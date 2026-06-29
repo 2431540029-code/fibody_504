@@ -269,12 +269,29 @@ class DatabaseHelper(context: Context) :
 
     private fun seedProducts(db: SQLiteDatabase) {
         val products = arrayOf(
-            "('Rule 1 - Pump (30 lần dùng)', 650000, 800000, 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=500', 'Tăng sức mạnh bùng nổ, không chứa chất kích thích.', 'Tăng sức mạnh', 'Còn hàng', 1)",
-            "('Kirkland - Vitamin C 500mg', 640000, 750000, 'https://images.unsplash.com/photo-1579722820308-d74e5719d23e?w=500', 'Hỗ trợ hệ miễn dịch và sức khỏe tổng quát.', 'Sức khỏe & Vitamin', 'Còn hàng', 1)",
-            "('Applied Nutrition - ABE', 790000, 890000, 'https://images.unsplash.com/photo-1594498653385-d5172b532c00?w=500', 'Pre-workout cực mạnh cho hiệu suất tối đa.', 'Tăng sức mạnh', 'Còn hàng', 0)",
-            "('Goodhealth - Joint Active', 377000, 450000, 'https://images.unsplash.com/photo-1583454110551-21f2fa209425?w=500', 'Hỗ trợ xương khớp linh hoạt.', 'Sức khỏe & Vitamin', 'Còn hàng', 1)",
-            "('Kirkland - Glucosamine HCL', 754000, 850000, 'https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=500', 'Bảo vệ sụn khớp tối ưu.', 'Sức khỏe & Vitamin', 'Còn hàng', 0)",
-            "('OstroVit - Creatine Monohydrate', 595000, 700000, 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500', 'Creatine tinh khiết giúp tăng cơ nhanh.', 'Tăng sức mạnh', 'Còn hàng', 1)"
+            // PAGE 1
+            "('Rule 1 - Pump (30 lần dùng)', 650000, 800000, 'prod_rule1_pump', 'Tăng sức mạnh bùng nổ.', 'Tăng sức mạnh', 'Còn hàng', 1)",
+            "('Whey Gold Standard 5lbs', 1550000, 1800000, 'prod_whey_gold', 'Đạm tinh khiết tăng cơ.', 'Protein', 'Còn hàng', 1)",
+            "(' Mutant Mass 5lbs', 950000, 1100000, 'prod_mutant_mass', 'Sữa tăng cân cực nhanh.', 'Tăng cân', 'Còn hàng', 0)",
+            "('Kirkland - Vitamin C', 640000, 750000, 'prod_vitamin_c', 'Hỗ trợ miễn dịch.', 'Sức khỏe', 'Còn hàng', 0)",
+            "('BCAA Amino Energy', 850000, 950000, 'prod_bcaa', 'Tăng năng lượng tập luyện.', 'Phục hồi', 'Còn hàng', 1)",
+            "('Creatine OstroVit', 550000, 650000, 'prod_creatine', 'Tăng sức mạnh cơ bắp.', 'Tăng sức mạnh', 'Còn hàng', 0)",
+            
+            // PAGE 2
+            "('ISO 100 5lbs', 1950000, 2200000, 'prod_iso100', 'Whey Protein cao cấp nhất.', 'Protein', 'Còn hàng', 1)",
+            "('Lipo 6 Black', 750000, 850000, 'prod_lipo6', 'Viên uống đốt mỡ mạnh.', 'Giảm mỡ', 'Còn hàng', 0)",
+            "('Omega 3 Kirkland', 450000, 550000, 'prod_omega3', 'Tốt cho tim mạch và não.', 'Sức khỏe', 'Còn hàng', 0)",
+            "('Pre-workout ABE', 790000, 890000, 'prod_abe', 'Kích thích tập luyện.', 'Tăng sức mạnh', 'Còn hàng', 1)",
+            "('Glucosamine 375 viên', 750000, 850000, 'prod_glucosamine', 'Bảo vệ xương khớp.', 'Sức khỏe', 'Còn hàng', 0)",
+            "('Sữa tăng cân Serious Mass', 1350000, 1500000, 'prod_serious_mass', 'Tăng cân cho người gầy.', 'Tăng cân', 'Còn hàng', 1)",
+
+            // PAGE 3
+            "('Bình lắc Shaker 700ml', 150000, 200000, 'prod_shaker', 'Tiện lợi pha Protein.', 'Phụ kiện', 'Còn hàng', 0)",
+            "('Găng tay tập Gym', 250000, 350000, 'prod_gloves', 'Bảo vệ bàn tay.', 'Phụ kiện', 'Còn hàng', 0)",
+            "('Thảm tập Yoga', 450000, 600000, 'prod_yoga_mat', 'Chống trượt êm ái.', 'Phụ kiện', 'Còn hàng', 0)",
+            "('Đai lưng tập tạ', 550000, 700000, 'prod_belt', 'Bảo vệ cột sống.', 'Phụ kiện', 'Còn hàng', 0)",
+            "('Dây kéo xà Straps', 120000, 180000, 'prod_straps', 'Hỗ trợ cầm nắm tạ.', 'Phụ kiện', 'Còn hàng', 0)",
+            "('Ống đồng bảo vệ chân', 300000, 450000, 'prod_shin_guards', 'Dành cho võ thuật/Gym.', 'Phụ kiện', 'Còn hàng', 0)"
         )
         for (p in products) {
             db.execSQL("INSERT INTO $TABLE_PRODUCTS (name, price, original_price, image, description, category, stock_status, has_gift) VALUES $p")
@@ -594,9 +611,10 @@ class DatabaseHelper(context: Context) :
         return writableDatabase.update(TABLE_USERS, values, "id = ?", arrayOf(userId.toString())) > 0
     }
 
-    fun getAllProducts(): List<Product> {
+    fun getProductsByPage(page: Int, pageSize: Int): List<Product> {
         val list = mutableListOf<Product>()
-        val cursor = readableDatabase.rawQuery("SELECT * FROM $TABLE_PRODUCTS", null)
+        val offset = (page - 1) * pageSize
+        val cursor = readableDatabase.rawQuery("SELECT * FROM $TABLE_PRODUCTS LIMIT ? OFFSET ?", arrayOf(pageSize.toString(), offset.toString()))
         if (cursor.moveToFirst()) {
             do {
                 list.add(Product(
@@ -614,6 +632,14 @@ class DatabaseHelper(context: Context) :
         }
         cursor.close()
         return list
+    }
+
+    fun getTotalProductCount(): Int {
+        val cursor = readableDatabase.rawQuery("SELECT COUNT(*) FROM $TABLE_PRODUCTS", null)
+        var count = 0
+        if (cursor.moveToFirst()) count = cursor.getInt(0)
+        cursor.close()
+        return count
     }
 
     fun addToCart(userId: Int, productId: Int): Boolean {

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/onboardingRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="24dp">
+
+    <TextView
+        android:id="@+id/txtSkip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bỏ qua"
+        android:textColor="#666666"
+        android:textSize="16sp"
+        android:gravity="end"/>
+
+    <ProgressBar
+        android:id="@+id/progressOnboarding"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:max="5"
+        android:progress="1"
+        android:layout_marginTop="18dp"/>
+
+    <TextView
+        android:id="@+id/txtQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Giới tính của bạn là gì?"
+        android:textColor="#000000"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="34dp"/>
+
+    <TextView
+        android:id="@+id/txtSubQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hãy cho chúng tôi biết thêm về bạn"
+        android:textColor="#222222"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_marginTop="10dp"/>
+
+    <LinearLayout
+        android:id="@+id/layoutOptions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginTop="36dp"/>
+
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="TIẾP THEO"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:backgroundTint="#0066FF"
+        android:textColor="#FFFFFF"/>
+
+</LinearLayout>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <include layout="@layout/toolbar_fitbody"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Thông tin tập luyện cá nhân"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Giới tính"
+                android:textColor="#AAAAAA"
+                android:textSize="16sp"
+                android:layout_marginTop="24dp"/>
+
+            <RadioGroup
+                android:id="@+id/radioGender"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <RadioButton
+                    android:id="@+id/radioMale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nam"
+                    android:textColor="#FFFFFF"/>
+
+                <RadioButton
+                    android:id="@+id/radioFemale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nữ"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="24dp"/>
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mục tiêu"
+                android:textColor="#AAAAAA"
+                android:textSize="16sp"
+                android:layout_marginTop="24dp"/>
+
+            <EditText
+                android:id="@+id/edtGoal"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:hint="Ví dụ: Giảm cân, Tăng cơ"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#888888"
+                android:backgroundTint="#FFFFFF"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Vùng tập trung"
+                android:textColor="#AAAAAA"
+                android:textSize="16sp"
+                android:layout_marginTop="24dp"/>
+
+            <Spinner
+                android:id="@+id/spinnerFocusArea"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:backgroundTint="#FFFFFF"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cân nặng"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="28dp"/>
+
+            <NumberPicker
+                android:id="@+id/pickerWeight"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chiều cao"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"/>
+
+            <NumberPicker
+                android:id="@+id/pickerHeight"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_marginTop="8dp"/>
+
+            <Button
+                android:id="@+id/btnSaveSetting"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:text="LƯU THAY ĐỔI"
+                android:textStyle="bold"
+                android:layout_marginTop="32dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:background="#121212">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="vertical"
+
+        android:padding="20dp">
+
+        <!-- TITLE -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="💪 Workout Plan"
+
+            android:textColor="#FFFFFF"
+
+            android:textSize="28sp"
+
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Today's Exercises"
+
+            android:textColor="#AAAAAA"
+
+            android:textSize="15sp"
+
+            android:layout_marginTop="4dp"
+
+            android:layout_marginBottom="24dp"/>
+
+        <!-- EXERCISE CARD -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:background="#1E1E1E"
+
+            android:orientation="vertical"
+
+            android:padding="18dp"
+
+            android:layout_marginBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_weight="1"
+
+                    android:text="🏋 Bench Press"
+
+                    android:textColor="#FFFFFF"
+
+                    android:textSize="20sp"
+
+                    android:textStyle="bold"/>
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="4 Sets • 12 Reps"
+
+                android:textColor="#AAAAAA"
+
+                android:textSize="15sp"
+
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="⏱ Rest: 60 sec"
+
+                android:textColor="#FF5252"
+
+                android:textSize="14sp"
+
+                android:layout_marginTop="8dp"/>
+
+        </LinearLayout>
+
+        <!-- CARD 2 -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:background="#1E1E1E"
+
+            android:orientation="vertical"
+
+            android:padding="18dp"
+
+            android:layout_marginBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_weight="1"
+
+                    android:text="🔥 Squat"
+
+                    android:textColor="#FFFFFF"
+
+                    android:textSize="20sp"
+
+                    android:textStyle="bold"/>
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="5 Sets • 10 Reps"
+
+                android:textColor="#AAAAAA"
+
+                android:textSize="15sp"
+
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="⏱ Rest: 90 sec"
+
+                android:textColor="#7C4DFF"
+
+                android:textSize="14sp"
+
+                android:layout_marginTop="8dp"/>
+
+        </LinearLayout>
+
+        <!-- CARD 3 -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:background="#1E1E1E"
+
+            android:orientation="vertical"
+
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_weight="1"
+
+                    android:text="⚡ Deadlift"
+
+                    android:textColor="#FFFFFF"
+
+                    android:textSize="20sp"
+
+                    android:textStyle="bold"/>
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="4 Sets • 8 Reps"
+
+                android:textColor="#AAAAAA"
+
+                android:textSize="15sp"
+
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="⏱ Rest: 120 sec"
+
+                android:textColor="#FF5252"
+
+                android:textSize="14sp"
+
+                android:layout_marginTop="8dp"/>
+            <Button
+                android:id="@+id/btnTimer"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:text="⏱ Open Workout Timer"
+
+                android:textColor="#FFFFFF"
+
+                android:textSize="18sp"
+
+                android:layout_marginTop="24dp"
+
+                android:backgroundTint="#7C4DFF"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

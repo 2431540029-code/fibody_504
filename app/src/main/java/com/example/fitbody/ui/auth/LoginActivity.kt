@@ -52,15 +52,19 @@ class LoginActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        // 2. Kiểm tra đăng nhập và chuyển hướng ngay lập tức nếu đã login
-        if (session.isLoggedIn() && !session.isSessionExpired()) {
-            val role = session.getRole()
-            if (role == "pt") {
-                openPt(session.getUserId(), session.getUsername())
-            } else {
-                openMainOrOnboarding(session.getUserId(), session.getUsername())
+        // 2. Kiểm tra đăng nhập an toàn
+        try {
+            if (session.isLoggedIn() && !session.isSessionExpired()) {
+                val role = session.getRole()
+                if (role == "pt") {
+                    openPt(session.getUserId(), session.getUsername())
+                } else {
+                    openMainOrOnboarding(session.getUserId(), session.getUsername())
+                }
+                return 
             }
-            return // Dừng lại ở đây, không load layout login nữa
+        } catch (e: Exception) {
+            session.logout() // Reset nếu có lỗi dữ liệu để tránh treo màn hình
         }
 
         // 3. Nếu chưa đăng nhập, hiển thị giao diện

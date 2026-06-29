@@ -21,10 +21,6 @@ import com.example.fitbody.model.Review
 import com.example.fitbody.model.Workout
 import com.example.fitbody.ui.WorkoutSessionActivity
 import com.example.fitbody.utils.SessionManager
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,74 +31,46 @@ class TrainerDetailActivity : AppCompatActivity() {
     private lateinit var recyclerWorkout: RecyclerView
     private lateinit var recyclerReviews: RecyclerView
     private lateinit var btnBack: TextView
+    private lateinit var txtStudentCount: TextView
     private var allWorkouts = listOf<Workout>()
     private var selectedRating = 5
+    private var isEnrolled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_trainer_detail)
 
         val dbHelper = DatabaseHelper(this)
         btnBack = findViewById(R.id.btnBack)
+        val imgTrainer = findViewById<ImageView>(R.id.imgTrainer)
+        val txtName = findViewById<TextView>(R.id.txtName)
+        val txtSpecialty = findViewById<TextView>(R.id.txtSpecialty)
+        val txtCalories = findViewById<TextView>(R.id.txtCalories)
+        txtStudentCount = findViewById(R.id.txtStudentCount)
+        val txtMuscle = findViewById<TextView>(R.id.txtMuscle)
+        val txtSchedule = findViewById<TextView>(R.id.txtSchedule)
 
-        val imgTrainer =
-            findViewById<ImageView>(R.id.imgTrainer)
-
-        val txtName =
-            findViewById<TextView>(R.id.txtName)
-
-        val txtSpecialty =
-            findViewById<TextView>(R.id.txtSpecialty)
-
-        val txtCalories =
-            findViewById<TextView>(R.id.txtCalories)
-
-        val txtStudentCount =
-            findViewById<TextView>(R.id.txtStudentCount)
-
-        val txtMuscle =
-            findViewById<TextView>(R.id.txtMuscle)
-
-        val txtSchedule =
-            findViewById<TextView>(R.id.txtSchedule)
-
-        recyclerWorkout =
-            findViewById(R.id.recyclerWorkout)
+        recyclerWorkout = findViewById(R.id.recyclerWorkout)
         recyclerReviews = findViewById(R.id.recyclerReviews)
         recyclerReviews.layoutManager = LinearLayoutManager(this)
 
+        // Các nút lọc danh mục
+        val btnFilterAll = findViewById<LinearLayout>(R.id.btnFilterAll)
         val btnFilterChest = findViewById<LinearLayout>(R.id.btnFilterChest)
         val btnFilterLeg = findViewById<LinearLayout>(R.id.btnFilterLeg)
         val btnFilterBack = findViewById<LinearLayout>(R.id.btnFilterBack)
 
-        btnBack.setOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
+        btnBack.setOnClickListener { finish() }
 
-        recyclerWorkout.layoutManager =
-            LinearLayoutManager(this)
+        recyclerWorkout.layoutManager = LinearLayoutManager(this)
 
-        val trainerId =
-            intent.getIntExtra("trainer_id", 0)
-
-        val name =
-            intent.getStringExtra("trainer_name") ?: ""
-
-        val specialty =
-            intent.getStringExtra("trainer_specialty") ?: ""
-
-        val image =
-            intent.getStringExtra("trainer_image") ?: ""
-
-        val calories =
-            intent.getStringExtra("trainer_calories") ?: ""
-
-        val muscle =
-            intent.getStringExtra("trainer_muscle") ?: ""
-
-        val schedule =
-            intent.getStringExtra("trainer_schedule") ?: ""
+        val trainerId = intent.getIntExtra("trainer_id", 0)
+        val name = intent.getStringExtra("trainer_name") ?: ""
+        val specialty = intent.getStringExtra("trainer_specialty") ?: ""
+        val image = intent.getStringExtra("trainer_image") ?: ""
+        val calories = intent.getStringExtra("trainer_calories") ?: ""
+        val muscle = intent.getStringExtra("trainer_muscle") ?: ""
+        val schedule = intent.getStringExtra("trainer_schedule") ?: ""
 
         txtName.text = name
         txtSpecialty.text = specialty
@@ -110,43 +78,64 @@ class TrainerDetailActivity : AppCompatActivity() {
         txtMuscle.text = muscle
         txtSchedule.text = schedule
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            val studentCount = dbHelper.getTrainerStudentCount(trainerId)
-            withContext(Dispatchers.Main) {
-                txtStudentCount.text = "👥 $studentCount người đang theo học"
-            }
-        }
+        updateStudentCount(trainerId)
 
-        // Hide empty fields for Plan mode
         if (specialty.isEmpty()) txtSpecialty.visibility = View.GONE
         if (calories.isEmpty()) txtCalories.visibility = View.GONE
         if (muscle.isEmpty()) txtMuscle.visibility = View.GONE
         if (schedule.isEmpty()) txtSchedule.visibility = View.GONE
 
         val imageResId = resources.getIdentifier(image, "drawable", packageName)
-        if (imageResId != 0) {
-            Glide.with(this)
-                .load(imageResId)
-                .into(imgTrainer)
-        } else {
-            Glide.with(this)
-                .load(R.drawable.male)
-                .into(imgTrainer)
-        }
+        Glide.with(this).load(if (imageResId != 0) imageResId else R.drawable.male).into(imgTrainer)
 
         loadWorkouts(trainerId)
         loadReviews(trainerId)
         setupReviewInput(trainerId)
         setupEnrollment(trainerId)
 
-        btnFilterChest.setOnClickListener { filterWorkouts("Ngực") }
-        btnFilterLeg.setOnClickListener { filterWorkouts("Chân") }
-        btnFilterBack.setOnClickListener { filterWorkouts("Lưng") }
+        // Logic lọc thông minh cho 14 HLV
+        btnFilterAll.setOnClickListener { 
+            updateFilterUI(btnFilterAll)
+            recyclerWorkout.adapter = WorkoutAdapter(allWorkouts) 
+        }
+        btnFilterChest.setOnClickListener { 
+            updateFilterUI(btnFilterChest)
+            filterWorkouts(listOf("Ngực", "Vai", "Tay", "Combat")) 
+        }
+        btnFilterLeg.setOnClickListener { 
+            updateFilterUI(btnFilterLeg)
+            filterWorkouts(listOf("Chân", "Mông", "Đùi")) 
+        }
+        btnFilterBack.setOnClickListener { 
+            updateFilterUI(btnFilterBack)
+            filterWorkouts(listOf("Lưng", "Bụng", "Core", "Sức mạnh")) 
+        }
 
         findViewById<Button>(R.id.btnStartWorkout).setOnClickListener {
             val intent = Intent(this, WorkoutSessionActivity::class.java)
             intent.putExtra("trainer_id", trainerId)
             startActivity(intent)
+        }
+    }
+
+    private fun updateFilterUI(selected: LinearLayout) {
+        val buttons = listOf(
+            findViewById<LinearLayout>(R.id.btnFilterAll),
+            findViewById<LinearLayout>(R.id.btnFilterChest),
+            findViewById<LinearLayout>(R.id.btnFilterLeg),
+            findViewById<LinearLayout>(R.id.btnFilterBack)
+        )
+        buttons.forEach { it.setBackgroundResource(R.drawable.bg_card_home) }
+        selected.setBackgroundResource(R.drawable.bg_card_service) // Đổi màu để làm nổi bật nút đang chọn
+    }
+
+    private fun updateStudentCount(trainerId: Int) {
+        val dbHelper = DatabaseHelper(this)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val count = dbHelper.getTrainerStudentCount(trainerId)
+            withContext(Dispatchers.Main) {
+                txtStudentCount.text = "👥 $count người đang theo học"
+            }
         }
     }
 
@@ -166,13 +155,9 @@ class TrainerDetailActivity : AppCompatActivity() {
         val dbHelper = DatabaseHelper(this)
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val isEnrolled = dbHelper.isUserEnrolled(userId, trainerId)
+            isEnrolled = dbHelper.isUserEnrolled(userId, trainerId)
             withContext(Dispatchers.Main) {
-                if (isEnrolled) {
-                    btnEnroll.text = "ĐÃ ĐĂNG KÝ THEO HỌC"
-                    btnEnroll.isEnabled = false
-                    btnEnroll.alpha = 0.5f
-                }
+                updateEnrollButton(btnEnroll)
             }
         }
 
@@ -181,17 +166,28 @@ class TrainerDetailActivity : AppCompatActivity() {
                 Toast.makeText(this, "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            
             lifecycleScope.launch(Dispatchers.IO) {
-                val success = dbHelper.enrollTrainer(userId, trainerId)
-                withContext(Dispatchers.Main) {
-                    if (success) {
-                        Toast.makeText(this@TrainerDetailActivity, "Đăng ký khóa học thành công!", Toast.LENGTH_SHORT).show()
-                        btnEnroll.text = "ĐÃ ĐĂNG KÝ THEO HỌC"
-                        btnEnroll.isEnabled = false
-                        btnEnroll.alpha = 0.5f
+                val success = if (isEnrolled) dbHelper.unenrollTrainer(userId, trainerId) else dbHelper.enrollTrainer(userId, trainerId)
+                if (success) {
+                    isEnrolled = !isEnrolled
+                    withContext(Dispatchers.Main) {
+                        updateEnrollButton(btnEnroll)
+                        updateStudentCount(trainerId)
+                        Toast.makeText(this@TrainerDetailActivity, if (isEnrolled) "Đã theo dõi!" else "Đã hủy theo dõi!", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
+        }
+    }
+
+    private fun updateEnrollButton(btn: Button) {
+        if (isEnrolled) {
+            btn.text = "ĐANG THEO DÕI"
+            btn.setBackgroundColor(android.graphics.Color.parseColor("#333333"))
+        } else {
+            btn.text = "ĐĂNG KÝ THEO HỌC"
+            btn.setBackgroundColor(android.graphics.Color.parseColor("#00E676"))
         }
     }
 
@@ -219,36 +215,37 @@ class TrainerDetailActivity : AppCompatActivity() {
         stars.forEachIndexed { index, textView ->
             textView.setOnClickListener {
                 selectedRating = index + 1
-                stars.forEachIndexed { i, star ->
-                    star.alpha = if (i <= index) 1.0f else 0.3f
-                }
+                stars.forEach { it.alpha = 0.3f }
+                for (i in 0..index) stars[i].alpha = 1.0f
             }
         }
 
         btnSubmit.setOnClickListener {
             val comment = edtComment.text.toString().trim()
-            if (comment.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập bình luận", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            if (comment.isEmpty()) return@setOnClickListener
 
             val userId = SessionManager(this).getUserId()
-            if (userId == 0) {
-                Toast.makeText(this, "Vui lòng đăng nhập để đánh giá", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            if (userId == 0) return@setOnClickListener
 
             val dbHelper = DatabaseHelper(this)
             if (dbHelper.addReview(userId, trainerId, selectedRating, comment)) {
-                Toast.makeText(this, "Gửi đánh giá thành công!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Đã gửi đánh giá", Toast.LENGTH_SHORT).show()
                 edtComment.text.clear()
                 loadReviews(trainerId)
             }
         }
     }
 
-    private fun filterWorkouts(muscle: String) {
-        val filtered = allWorkouts.filter { it.muscle_group.contains(muscle, true) }
-        recyclerWorkout.adapter = WorkoutAdapter(filtered)
+    private fun filterWorkouts(keywords: List<String>) {
+        val filtered = allWorkouts.filter { workout ->
+            keywords.any { target -> workout.muscle_group.contains(target, ignoreCase = true) }
+        }
+        
+        if (filtered.isEmpty()) {
+            Toast.makeText(this, "HLV này chưa có bài tập trong mục này", Toast.LENGTH_SHORT).show()
+            recyclerWorkout.adapter = WorkoutAdapter(allWorkouts) // Reset nếu không có
+        } else {
+            recyclerWorkout.adapter = WorkoutAdapter(filtered)
+        }
     }
 }

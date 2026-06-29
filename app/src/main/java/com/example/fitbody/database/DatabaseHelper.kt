@@ -946,6 +946,12 @@ class DatabaseHelper(context: Context) :
         return exists
     }
 
+    fun unenrollTrainer(userId: Int, trainerId: Int): Boolean {
+        return try {
+            writableDatabase.delete(TABLE_ENROLLMENTS, "user_id = ? AND trainer_id = ?", arrayOf(userId.toString(), trainerId.toString())) > 0
+        } catch (e: Exception) { false }
+    }
+
     fun getStudentsForTrainer(trainerId: Int): List<com.example.fitbody.model.User> {
         val list = mutableListOf<com.example.fitbody.model.User>()
         val query = "SELECT u.* FROM $TABLE_USERS u JOIN $TABLE_ENROLLMENTS e ON u.id = e.user_id WHERE e.trainer_id = ?"

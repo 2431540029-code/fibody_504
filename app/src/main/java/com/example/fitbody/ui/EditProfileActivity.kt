@@ -1,6 +1,8 @@
 package com.example.fitbody.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -13,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.fitbody.R
 import com.example.fitbody.database.DatabaseHelper
@@ -33,6 +36,7 @@ class EditProfileActivity : AppCompatActivity() {
 
     private var avatarPath: String? = null
 
+    // Launcher chọn ảnh từ thư viện
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             imgAvatarEdit.setImageURI(it)
@@ -40,6 +44,7 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
+    // Launcher chụp ảnh mới
     private val takePhoto = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val bitmap = result.data?.extras?.get("data") as? Bitmap
@@ -47,6 +52,15 @@ class EditProfileActivity : AppCompatActivity() {
                 imgAvatarEdit.setImageBitmap(it)
                 saveBitmapToInternalStorage(it)
             }
+        }
+    }
+
+    // Launcher xin quyền Camera
+    private val requestCameraPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            openCamera()
+        } else {
+            Toast.makeText(this, "Bạn cần cấp quyền Camera để chụp ảnh", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -77,10 +91,29 @@ class EditProfileActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Thay đổi ảnh đại diện")
             .setItems(options) { _, which ->
-                if (which == 0) pickImage.launch("image/*")
-                else takePhoto.launch(Intent(MediaStore.ACTION_IMAGE_CAPTURE))
+                if (which == 0) {
+                    pickImage.launch("image/*")
+                } else {
+                    checkCameraPermissionAndOpen()
+                }
             }
             .show()
+    }
+
+    private fun checkCameraPermissionAndOpen() {
+        when {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+                openCamera()
+            }
+            else -> {
+                requestCameraPermission.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
+
+    private fun openCamera() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        takePhoto.launch(intent)
     }
 
     private fun saveImageToInternalStorage(uri: Uri) {

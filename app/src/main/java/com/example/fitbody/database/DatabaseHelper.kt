@@ -17,7 +17,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "fitbody.db"
-        private const val DATABASE_VERSION = 14 // Nâng version để thêm cột phone
+        private const val DATABASE_VERSION = 15 // Nâng version để cập nhật bảng sản phẩm
 
         const val TABLE_USERS = "tbl_users"
         const val TABLE_TRAINERS = "tbl_trainers"
@@ -121,9 +121,12 @@ class DatabaseHelper(context: Context) :
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT,
                 price INTEGER,
+                original_price INTEGER,
                 image TEXT,
                 description TEXT,
-                category TEXT
+                category TEXT,
+                stock_status TEXT DEFAULT 'Còn hàng',
+                has_gift INTEGER DEFAULT 0
             )
         """.trimIndent())
 
@@ -266,15 +269,15 @@ class DatabaseHelper(context: Context) :
 
     private fun seedProducts(db: SQLiteDatabase) {
         val products = arrayOf(
-            "('Whey Protein Gold Standard', 1550000, 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=500', 'Đạm tinh khiết hỗ trợ phục hồi và phát triển cơ bắp sau tập.', 'Thực phẩm bổ sung')",
-            "('BCAA Amino Energy', 850000, 'https://images.unsplash.com/photo-1579722820308-d74e5719d23e?w=500', 'Tăng cường năng lượng và giảm mệt mỏi cơ bắp trong lúc tập.', 'Thực phẩm bổ sung')",
-            "('Creatine Platinum', 550000, 'https://images.unsplash.com/photo-1594498653385-d5172b532c00?w=500', 'Tăng sức mạnh bùng nổ và hiệu suất tập luyện cường độ cao.', 'Thực phẩm bổ sung')",
-            "('Găng tay Harbinger', 350000, 'https://images.unsplash.com/photo-1583454110551-21f2fa209425?w=500', 'Bảo vệ lòng bàn tay, tăng độ bám và tránh chai tay.', 'Phụ kiện')",
-            "('Thảm Yoga Adidas 8mm', 650000, 'https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=500', 'Chất liệu cao cấp chống trơn trượt, êm ái cho xương khớp.', 'Phụ kiện')",
-            "('Bình lắc Shaker 700ml', 150000, 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500', 'Tiện lợi để pha protein mang đi tập mọi lúc mọi nơi.', 'Phụ kiện')"
+            "('Rule 1 - Pump (30 lần dùng)', 650000, 800000, 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=500', 'Tăng sức mạnh bùng nổ, không chứa chất kích thích.', 'Tăng sức mạnh', 'Còn hàng', 1)",
+            "('Kirkland - Vitamin C 500mg', 640000, 750000, 'https://images.unsplash.com/photo-1579722820308-d74e5719d23e?w=500', 'Hỗ trợ hệ miễn dịch và sức khỏe tổng quát.', 'Sức khỏe & Vitamin', 'Còn hàng', 1)",
+            "('Applied Nutrition - ABE', 790000, 890000, 'https://images.unsplash.com/photo-1594498653385-d5172b532c00?w=500', 'Pre-workout cực mạnh cho hiệu suất tối đa.', 'Tăng sức mạnh', 'Còn hàng', 0)",
+            "('Goodhealth - Joint Active', 377000, 450000, 'https://images.unsplash.com/photo-1583454110551-21f2fa209425?w=500', 'Hỗ trợ xương khớp linh hoạt.', 'Sức khỏe & Vitamin', 'Còn hàng', 1)",
+            "('Kirkland - Glucosamine HCL', 754000, 850000, 'https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=500', 'Bảo vệ sụn khớp tối ưu.', 'Sức khỏe & Vitamin', 'Còn hàng', 0)",
+            "('OstroVit - Creatine Monohydrate', 595000, 700000, 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500', 'Creatine tinh khiết giúp tăng cơ nhanh.', 'Tăng sức mạnh', 'Còn hàng', 1)"
         )
         for (p in products) {
-            db.execSQL("INSERT INTO $TABLE_PRODUCTS (name, price, image, description, category) VALUES $p")
+            db.execSQL("INSERT INTO $TABLE_PRODUCTS (name, price, original_price, image, description, category, stock_status, has_gift) VALUES $p")
         }
     }
 
@@ -596,7 +599,17 @@ class DatabaseHelper(context: Context) :
         val cursor = readableDatabase.rawQuery("SELECT * FROM $TABLE_PRODUCTS", null)
         if (cursor.moveToFirst()) {
             do {
-                list.add(Product(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getString(3), cursor.getString(4), cursor.getString(5)))
+                list.add(Product(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getInt(2),
+                    cursor.getInt(3),
+                    cursor.getString(4),
+                    cursor.getString(5),
+                    cursor.getString(6),
+                    cursor.getString(7) == "Còn hàng",
+                    cursor.getInt(8) == 1
+                ))
             } while (cursor.moveToNext())
         }
         cursor.close()

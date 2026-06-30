@@ -75,7 +75,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/baseline_shopping_cart_24"
         app:backgroundTint="#7C4DFF"
         app:tint="#FFFFFF"
         android:contentDescription="Giỏ hàng" />

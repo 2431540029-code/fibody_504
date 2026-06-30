@@ -6,6 +6,6 @@ data class CartItem(
     val name: String,
     val price: Int,
     val image: String,
-    val quantity: Int,
+    var quantity: Int, // Change to var to allow update
     var isSelected: Boolean = true
 )

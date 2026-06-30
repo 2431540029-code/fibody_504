@@ -1,5 +1,6 @@
 package com.example.fitbody.adapter
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.fitbody.R
 import com.example.fitbody.model.Order
+import com.example.fitbody.ui.OrderDetailActivity
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -39,15 +41,19 @@ class OrderAdapter(
         holder.txtOrderStatus.text = order.status
         holder.txtOrderTotal.text = "${formatter.format(order.totalPrice)}đ"
 
-        // Hiển thị trạng thái vận chuyển giả lập
+        // Hiển thị trạng thái vận chuyển
         when (order.status) {
             "Đang xử lý" -> {
                 holder.txtOrderStatus.setTextColor(android.graphics.Color.YELLOW)
                 holder.txtDeliveryInfo.text = "📦 Đơn hàng đang được chuẩn bị"
             }
-            "Đang giao hàng" -> {
-                holder.txtOrderStatus.setTextColor(android.graphics.Color.CYAN)
-                holder.txtDeliveryInfo.text = "🚚 Shipper đang trên đường tới bạn"
+            "Đã hủy" -> {
+                holder.txtOrderStatus.setTextColor(android.graphics.Color.RED)
+                holder.txtDeliveryInfo.text = "❌ Đơn hàng đã bị hủy"
+            }
+            "Yêu cầu hoàn tiền" -> {
+                holder.txtOrderStatus.setTextColor(android.graphics.Color.MAGENTA)
+                holder.txtDeliveryInfo.text = "💰 Đang xem xét hoàn tiền"
             }
             else -> {
                 holder.txtOrderStatus.setTextColor(android.graphics.Color.GREEN)
@@ -55,7 +61,7 @@ class OrderAdapter(
             }
         }
 
-        // Render danh sách sản phẩm con trong đơn hàng
+        // Render danh sách sản phẩm con
         holder.layoutOrderItems.removeAllViews()
         for (item in order.items) {
             val itemView = LayoutInflater.from(context).inflate(R.layout.item_order_sub_item, holder.layoutOrderItems, false)
@@ -66,14 +72,17 @@ class OrderAdapter(
             name.text = "${item.productName} (x${item.quantity})"
             price.text = "${formatter.format(item.price)}đ"
 
-            val resId = context.resources.getIdentifier(
-                item.productImage.replace(".png", "").replace(".jpg", ""),
-                "drawable",
-                context.packageName
-            )
+            val resId = context.resources.getIdentifier(item.productImage, "drawable", context.packageName)
             Glide.with(context).load(if (resId != 0) resId else item.productImage).into(img)
             
             holder.layoutOrderItems.addView(itemView)
+        }
+
+        // Click để xem chi tiết
+        holder.itemView.setOnClickListener {
+            val intent = Intent(context, OrderDetailActivity::class.java)
+            intent.putExtra("order_id", order.id)
+            context.startActivity(intent)
         }
     }
 

@@ -16,7 +16,7 @@ import java.util.Locale
 
 class CartAdapter(
     private val cartList: List<CartItem>,
-    private val onSelectionChanged: () -> Unit
+    private val onDataChanged: () -> Unit
 ) : RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
 
     class CartViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -25,6 +25,8 @@ class CartAdapter(
         val txtCartName: TextView = itemView.findViewById(R.id.txtCartName)
         val txtCartPrice: TextView = itemView.findViewById(R.id.txtCartPrice)
         val txtCartQuantity: TextView = itemView.findViewById(R.id.txtCartQuantity)
+        val btnMinus: TextView = itemView.findViewById(R.id.btnMinus)
+        val btnPlus: TextView = itemView.findViewById(R.id.btnPlus)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CartViewHolder {
@@ -43,14 +45,9 @@ class CartAdapter(
         val formatter = NumberFormat.getInstance(Locale("vi", "VN"))
         holder.txtCartName.text = item.name
         holder.txtCartPrice.text = formatter.format(item.price) + "đ"
-        holder.txtCartQuantity.text = "Số lượng: ${item.quantity}"
+        holder.txtCartQuantity.text = item.quantity.toString()
 
-        val resId = context.resources.getIdentifier(
-            item.image.replace(".png", "").replace(".jpg", ""),
-            "drawable",
-            context.packageName
-        )
-
+        val resId = context.resources.getIdentifier(item.image, "drawable", context.packageName)
         Glide.with(context)
             .load(if (resId != 0) resId else item.image)
             .placeholder(R.drawable.ic_launcher_background)
@@ -59,7 +56,28 @@ class CartAdapter(
         holder.cbSelected.setOnCheckedChangeListener { _, isChecked ->
             item.isSelected = isChecked
             dbHelper.updateCartSelection(item.id, isChecked)
-            onSelectionChanged()
+            onDataChanged()
+        }
+
+        holder.btnMinus.setOnClickListener {
+            if (item.quantity > 1) {
+                item.quantity -= 1
+                dbHelper.writableDatabase.execSQL("UPDATE tbl_cart SET quantity = ? WHERE id = ?", arrayOf(item.quantity, item.id))
+                notifyItemChanged(position)
+                onDataChanged()
+            } else {
+                dbHelper.writableDatabase.delete("tbl_cart", "id = ?", arrayOf(item.id.toString()))
+                (cartList as MutableList).removeAt(position)
+                notifyDataSetChanged() // Easier to just reload everything on delete
+                onDataChanged()
+            }
+        }
+
+        holder.btnPlus.setOnClickListener {
+            item.quantity += 1
+            dbHelper.writableDatabase.execSQL("UPDATE tbl_cart SET quantity = ? WHERE id = ?", arrayOf(item.quantity, item.id))
+            notifyItemChanged(position)
+            onDataChanged()
         }
     }
 

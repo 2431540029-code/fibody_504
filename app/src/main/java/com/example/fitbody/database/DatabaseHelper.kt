@@ -17,7 +17,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "fitbody.db"
-        private const val DATABASE_VERSION = 16 // Nâng version để thêm cột address
+        private const val DATABASE_VERSION = 17 // Nâng version để thêm thông tin chi tiết đơn hàng
 
         const val TABLE_USERS = "tbl_users"
         const val TABLE_TRAINERS = "tbl_trainers"
@@ -149,6 +149,12 @@ class DatabaseHelper(context: Context) :
                 total_price INTEGER,
                 order_date TEXT,
                 status TEXT DEFAULT 'Đang xử lý',
+                payment_method TEXT,
+                receiver_name TEXT,
+                receiver_phone TEXT,
+                receiver_address TEXT,
+                estimated_delivery TEXT,
+                refund_reason TEXT,
                 FOREIGN KEY(user_id) REFERENCES $TABLE_USERS(id)
             )
         """.trimIndent())
@@ -257,21 +263,25 @@ class DatabaseHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_TRAINERS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_WORKOUTS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_SCHEDULE")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_CHECKIN")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_FAVORITES")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_LIKES")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_PROGRESS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_PRODUCTS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_CART")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_REVIEWS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_ENROLLMENTS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_ORDERS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_ORDER_ITEMS")
-        onCreate(db)
+        if (oldVersion < 13) {
+            try { db.execSQL("ALTER TABLE $TABLE_USERS ADD COLUMN avatar TEXT") } catch (e: Exception) {}
+        }
+        if (oldVersion < 14) {
+            try { db.execSQL("ALTER TABLE $TABLE_USERS ADD COLUMN phone TEXT") } catch (e: Exception) {}
+        }
+        if (oldVersion < 16) {
+            try { db.execSQL("ALTER TABLE $TABLE_USERS ADD COLUMN address TEXT") } catch (e: Exception) {}
+        }
+        if (oldVersion < 17) {
+            try {
+                db.execSQL("ALTER TABLE $TABLE_ORDERS ADD COLUMN payment_method TEXT")
+                db.execSQL("ALTER TABLE $TABLE_ORDERS ADD COLUMN receiver_name TEXT")
+                db.execSQL("ALTER TABLE $TABLE_ORDERS ADD COLUMN receiver_phone TEXT")
+                db.execSQL("ALTER TABLE $TABLE_ORDERS ADD COLUMN receiver_address TEXT")
+                db.execSQL("ALTER TABLE $TABLE_ORDERS ADD COLUMN estimated_delivery TEXT")
+                db.execSQL("ALTER TABLE $TABLE_ORDERS ADD COLUMN refund_reason TEXT")
+            } catch (e: Exception) {}
+        }
     }
 
     private fun seedProducts(db: SQLiteDatabase) {
@@ -773,19 +783,39 @@ class DatabaseHelper(context: Context) :
         return db.update(TABLE_CART, values, "id = ?", arrayOf(cartId.toString())) > 0
     }
 
-    fun placeOrder(userId: Int, total: Int, items: List<CartItem>): Boolean {
+    fun placeOrder(
+        userId: Int, 
+        total: Int, 
+        items: List<CartItem>, 
+        paymentMethod: String, 
+        name: String, 
+        phone: String, 
+        address: String
+    ): Long {
         val db = writableDatabase
         db.beginTransaction()
         try {
-            val date = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+            val sdf = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+            val date = sdf.format(java.util.Date())
+            
+            // Dự kiến giao hàng sau 3 ngày
+            val calendar = java.util.Calendar.getInstance()
+            calendar.add(java.util.Calendar.DAY_OF_YEAR, 3)
+            val estDate = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(calendar.time)
+
             val orderValues = ContentValues().apply {
                 put("user_id", userId)
                 put("total_price", total)
                 put("order_date", date)
                 put("status", "Đang xử lý")
+                put("payment_method", paymentMethod)
+                put("receiver_name", name)
+                put("receiver_phone", phone)
+                put("receiver_address", address)
+                put("estimated_delivery", estDate)
             }
             val orderId = db.insert(TABLE_ORDERS, null, orderValues)
-            if (orderId == -1L) return false
+            if (orderId == -1L) return -1L
 
             for (item in items) {
                 val itemValues = ContentValues().apply {
@@ -795,16 +825,38 @@ class DatabaseHelper(context: Context) :
                     put("price", item.price)
                 }
                 db.insert(TABLE_ORDER_ITEMS, null, itemValues)
-                // Xóa sản phẩm đã mua khỏi giỏ hàng
                 db.delete(TABLE_CART, "id = ?", arrayOf(item.id.toString()))
             }
             db.setTransactionSuccessful()
-            return true
+            return orderId
         } catch (e: Exception) {
-            return false
+            return -1L
         } finally {
             db.endTransaction()
         }
+    }
+
+    fun updateOrderStatus(orderId: Int, status: String, refundReason: String? = null): Boolean {
+        val values = ContentValues().apply {
+            put("status", status)
+            if (refundReason != null) put("refund_reason", refundReason)
+        }
+        return writableDatabase.update(TABLE_ORDERS, values, "id = ?", arrayOf(orderId.toString())) > 0
+    }
+
+    fun getOrderById(orderId: Int): com.example.fitbody.model.Order? {
+        val cursor = readableDatabase.rawQuery("SELECT * FROM $TABLE_ORDERS WHERE id = ?", arrayOf(orderId.toString()))
+        var order: com.example.fitbody.model.Order? = null
+        if (cursor.moveToFirst()) {
+            order = com.example.fitbody.model.Order(
+                cursor.getInt(0), cursor.getInt(1), cursor.getInt(2),
+                cursor.getString(3), cursor.getString(4), cursor.getString(5),
+                cursor.getString(6), cursor.getString(7), cursor.getString(8),
+                cursor.getString(9), cursor.getString(10), getOrderItems(orderId)
+            )
+        }
+        cursor.close()
+        return order
     }
 
     fun getOrderHistory(userId: Int): List<com.example.fitbody.model.Order> {
@@ -814,12 +866,10 @@ class DatabaseHelper(context: Context) :
             do {
                 val orderId = cursor.getInt(0)
                 list.add(com.example.fitbody.model.Order(
-                    orderId,
-                    cursor.getInt(1),
-                    cursor.getInt(2),
-                    cursor.getString(3),
-                    cursor.getString(4),
-                    getOrderItems(orderId)
+                    orderId, cursor.getInt(1), cursor.getInt(2),
+                    cursor.getString(3), cursor.getString(4), cursor.getString(5),
+                    cursor.getString(6), cursor.getString(7), cursor.getString(8),
+                    cursor.getString(9), cursor.getString(10), getOrderItems(orderId)
                 ))
             } while (cursor.moveToNext())
         }

@@ -89,30 +89,4 @@ class CartActivity : AppCompatActivity() {
         val formatter = NumberFormat.getInstance(Locale("vi", "VN"))
         txtTotalPrice.text = "Tổng tiền: ${formatter.format(total)}đ"
     }
-
-    private fun showCheckoutConfirmation(selectedItems: List<CartItem>) {
-        val total = selectedItems.sumOf { it.price * it.quantity }
-        val formatter = NumberFormat.getInstance(Locale("vi", "VN"))
-        
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Xác nhận thanh toán")
-            .setMessage("Bạn chọn mua ${selectedItems.size} sản phẩm.\nTổng cộng: ${formatter.format(total)}đ")
-            .setPositiveButton("Xác nhận đặt hàng") { _, _ ->
-                processCheckout(selectedItems, total)
-            }
-            .setNegativeButton("Hủy", null)
-            .show()
-    }
-
-    private fun processCheckout(selectedItems: List<CartItem>, total: Int) {
-        val userId = SessionManager(this).getUserId()
-        val dbHelper = DatabaseHelper(this)
-        
-        if (dbHelper.placeOrder(userId, total, selectedItems)) {
-            Toast.makeText(this, "Đặt hàng thành công! Đang chuẩn bị giao hàng.", Toast.LENGTH_LONG).show()
-            loadCart() // Tải lại để mất những món đã mua
-        } else {
-            Toast.makeText(this, "Lỗi khi xử lý đơn hàng", Toast.LENGTH_SHORT).show()
-        }
-    }
 }

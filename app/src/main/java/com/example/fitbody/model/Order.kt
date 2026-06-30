@@ -5,7 +5,13 @@ data class Order(
     val userId: Int,
     val totalPrice: Int,
     val orderDate: String,
-    val status: String,
+    val status: String, // Đang xử lý, Đã giao, Đã hủy, Yêu cầu hoàn tiền
+    val paymentMethod: String,
+    val receiverName: String,
+    val receiverPhone: String,
+    val receiverAddress: String,
+    val estimatedDelivery: String,
+    val refundReason: String? = null,
     val items: List<OrderItem> = emptyList()
 )
 

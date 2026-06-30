@@ -26,6 +26,7 @@
 
         <activity
             android:name=".ui.auth.LoginActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
 
             <intent-filter>
@@ -37,6 +38,7 @@
 
         <activity
             android:name=".ui.auth.RegisterActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -70,6 +72,7 @@
 
         <activity
             android:name=".ui.BMICalculatorActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -78,10 +81,12 @@
 
         <activity
             android:name=".ui.EditProfileActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.ChangePasswordActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -110,6 +115,7 @@
 
         <activity
             android:name=".ui.OnboardingActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -156,6 +162,11 @@
 
         <activity
             android:name=".ui.ContactActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.CheckoutActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>

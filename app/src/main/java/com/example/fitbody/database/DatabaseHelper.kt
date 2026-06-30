@@ -17,7 +17,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "fitbody.db"
-        private const val DATABASE_VERSION = 15 // Nâng version để cập nhật bảng sản phẩm
+        private const val DATABASE_VERSION = 16 // Nâng version để thêm cột address
 
         const val TABLE_USERS = "tbl_users"
         const val TABLE_TRAINERS = "tbl_trainers"
@@ -46,7 +46,8 @@ class DatabaseHelper(context: Context) :
                 provider TEXT,
                 role TEXT DEFAULT 'user',
                 avatar TEXT,
-                phone TEXT
+                phone TEXT,
+                address TEXT
             )
         """.trimIndent())
 
@@ -604,15 +605,16 @@ class DatabaseHelper(context: Context) :
     }
 
     fun getUserProfile(userId: Int): android.database.Cursor {
-        return readableDatabase.rawQuery("SELECT username, email, avatar, phone FROM $TABLE_USERS WHERE id = ?", arrayOf(userId.toString()))
+        return readableDatabase.rawQuery("SELECT username, email, avatar, phone, address FROM $TABLE_USERS WHERE id = ?", arrayOf(userId.toString()))
     }
 
-    fun updateUserProfile(userId: Int, name: String, email: String, avatar: String? = null, phone: String? = null): Boolean {
+    fun updateUserProfile(userId: Int, name: String, email: String, avatar: String? = null, phone: String? = null, address: String? = null): Boolean {
         val values = ContentValues().apply { 
             put("username", name)
             put("email", email)
             if (avatar != null) put("avatar", avatar)
             if (phone != null) put("phone", phone)
+            if (address != null) put("address", address)
         }
         return writableDatabase.update(TABLE_USERS, values, "id = ?", arrayOf(userId.toString())) > 0
     }

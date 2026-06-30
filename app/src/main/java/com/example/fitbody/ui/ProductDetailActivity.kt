@@ -1,5 +1,6 @@
 package com.example.fitbody.ui
 
+import android.content.Intent
 import android.graphics.Paint
 import android.os.Bundle
 import android.view.View
@@ -27,8 +28,10 @@ class ProductDetailActivity : AppCompatActivity() {
     private lateinit var layoutGiftDetail: LinearLayout
     private lateinit var txtProductDescriptionDetail: TextView
     private lateinit var btnAddToCart: Button
+    private lateinit var btnBuyNow: Button
 
     private var productId = 0
+    private var productPrice = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +42,7 @@ class ProductDetailActivity : AppCompatActivity() {
 
         btnBack.setOnClickListener { finish() }
         btnAddToCart.setOnClickListener { addToCart() }
+        btnBuyNow.setOnClickListener { buyNow() }
     }
 
     private fun initViews() {
@@ -51,12 +55,13 @@ class ProductDetailActivity : AppCompatActivity() {
         layoutGiftDetail = findViewById(R.id.layoutGiftDetail)
         txtProductDescriptionDetail = findViewById(R.id.txtProductDescriptionDetail)
         btnAddToCart = findViewById(R.id.btnAddToCart)
+        btnBuyNow = findViewById(R.id.btnBuyNow)
     }
 
     private fun setupData() {
         productId = intent.getIntExtra("product_id", 0)
         val name = intent.getStringExtra("product_name") ?: ""
-        val price = intent.getIntExtra("product_price", 0)
+        productPrice = intent.getIntExtra("product_price", 0)
         val originalPrice = intent.getIntExtra("product_original_price", 0)
         val image = intent.getStringExtra("product_image") ?: ""
         val description = intent.getStringExtra("product_description") ?: ""
@@ -67,7 +72,7 @@ class ProductDetailActivity : AppCompatActivity() {
         txtProductDescriptionDetail.text = description
         
         val formatter = NumberFormat.getInstance(Locale("vi", "VN"))
-        txtProductPriceDetail.text = formatter.format(price) + "đ"
+        txtProductPriceDetail.text = formatter.format(productPrice) + "đ"
         
         txtOriginalPriceDetail.text = formatter.format(originalPrice) + "đ"
         txtOriginalPriceDetail.paintFlags = txtOriginalPriceDetail.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
@@ -77,7 +82,6 @@ class ProductDetailActivity : AppCompatActivity() {
         
         layoutGiftDetail.visibility = if (gift) View.VISIBLE else View.GONE
 
-        // Sửa logic tải ảnh từ Resource giống trang Shop
         val resId = resources.getIdentifier(image, "drawable", packageName)
         Glide.with(this)
             .load(if (resId != 0) resId else image)
@@ -88,7 +92,6 @@ class ProductDetailActivity : AppCompatActivity() {
     private fun addToCart() {
         val session = SessionManager(this)
         val currentUserId = session.getUserId()
-
         if (currentUserId == 0) {
             Toast.makeText(this, "Vui lòng đăng nhập để mua hàng", Toast.LENGTH_SHORT).show()
             return
@@ -98,5 +101,16 @@ class ProductDetailActivity : AppCompatActivity() {
         if (dbHelper.addToCart(currentUserId, productId)) {
             Toast.makeText(this, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun buyNow() {
+        val session = SessionManager(this)
+        if (session.getUserId() == 0) {
+            Toast.makeText(this, "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val intent = Intent(this, CheckoutActivity::class.java)
+        intent.putExtra("total_price", productPrice)
+        startActivity(intent)
     }
 }

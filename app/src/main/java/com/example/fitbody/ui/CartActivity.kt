@@ -59,7 +59,10 @@ class CartActivity : AppCompatActivity() {
             if (selectedItems.isEmpty()) {
                 Toast.makeText(this, "Vui lòng chọn sản phẩm để thanh toán", Toast.LENGTH_SHORT).show()
             } else {
-                showCheckoutConfirmation(selectedItems)
+                val total = selectedItems.sumOf { it.price * it.quantity }
+                val intent = Intent(this, CheckoutActivity::class.java)
+                intent.putExtra("total_price", total)
+                startActivity(intent)
             }
         }
 

@@ -158,9 +158,9 @@ class OnboardingActivity : AppCompatActivity() {
 
         val progressBar = ProgressBar(this, null, android.R.attr.progressBarStyleLarge)
         val percentText = TextView(this)
-        percentText.textSize = 40f
+        percentText.textSize = 32f // Giảm nhẹ kích thước để an toàn hơn
         percentText.setTypeface(null, Typeface.BOLD)
-        percentText.setTextColor(Color.BLACK)
+        percentText.setTextColor(if (step == 6) Color.WHITE else Color.BLACK)
         percentText.setPadding(0, 30, 0, 0)
         percentText.text = "0%"
 
@@ -641,7 +641,7 @@ class OnboardingActivity : AppCompatActivity() {
     private fun createOptionParams(): LinearLayout.LayoutParams {
         val params = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            92
+            ViewGroup.LayoutParams.WRAP_CONTENT
         )
         params.setMargins(0, 12, 0, 12)
         return params
@@ -650,7 +650,7 @@ class OnboardingActivity : AppCompatActivity() {
     private fun createGoalOptionParams(): LinearLayout.LayoutParams {
         val params = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            112
+            ViewGroup.LayoutParams.WRAP_CONTENT
         )
         params.setMargins(0, 10, 0, 10)
         return params

@@ -143,16 +143,30 @@
         android:elevation="8dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingHorizontal="20dp">
+        android:paddingHorizontal="16dp">
 
         <Button
             android:id="@+id/btnAddToCart"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="55dp"
-            android:backgroundTint="#FF5252"
-            android:text="THÊM VÀO GIỎ HÀNG"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="#333333"
+            android:text="THÊM VÀO GIỎ"
             android:textColor="#FFFFFF"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textSize="13sp"/>
+
+        <Button
+            android:id="@+id/btnBuyNow"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:layout_weight="1"
+            android:backgroundTint="#FF5252"
+            android:text="MUA NGAY"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="13sp"/>
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

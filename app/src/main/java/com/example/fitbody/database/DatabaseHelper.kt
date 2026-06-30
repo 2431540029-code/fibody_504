@@ -235,14 +235,20 @@ class DatabaseHelper(context: Context) :
 
     private fun seedTrainers(db: SQLiteDatabase) {
         val trainers = arrayOf(
-            "(1, 'HLV AN', 'Bodybuilding', 'Ngực - Tay sau', '850 kcal', 'Thứ 2 / 4 / 6', 'pt_an', 'Chuyên gia xây dựng cơ bắp với hơn 10 năm kinh nghiệm huấn luyện thi đấu.', 'active')",
-            "(2, 'HLV Quỳnh Anh', 'Fitness Nữ', 'Mông - Đùi', '720 kcal', 'Thứ 3 / 5 / 7', 'pt_quynh_anh', 'Huấn luyện viên chuyên biệt cho nữ giới, tập trung cải thiện vóc dáng và độ dẻo dai.', 'active')",
-            "(16, 'HLV Tiến', 'Sức mạnh (Strength)', 'Full Body', '900 kcal', 'Hàng ngày', 'pt_tien', 'Tập trung vào các bài tập sức mạnh cơ bản và nâng cao cho nam giới.', 'active')",
-            "(17, 'HLV Trí', 'Calisthenics', 'Lưng - Bụng', '650 kcal', 'Thứ 2 / 3 / 5 / 6', 'pt_tri', 'Chuyên gia tập luyện với trọng lượng cơ thể, giúp cơ thể săn chắc và linh hoạt.', 'active')",
-            "(18, 'HLV Nhi', 'Yoga & Pilates', 'Toàn thân', '450 kcal', 'Thứ 3 / 5 / Chủ nhật', 'pt_nhi', 'Giúp bạn tìm lại sự cân bằng, giảm căng thẳng và cải thiện tư thế.', 'active')",
-            "(19, 'HLV Tony', 'Crossfit', 'Toàn thân', '1000 kcal', 'Mỗi ngày', 'pt_tony', 'Đốt cháy mỡ thừa tối đa với các bài tập cường độ cao liên tục.', 'active')",
-            "(21, 'HLV Jenny', 'Cardio giảm cân', 'Bụng - Eo', '750 kcal', 'Thứ 2 / 4 / 6 / 7', 'pt_jenny', 'Chuyên giáo án giảm mỡ bụng nhanh chóng cho người bận rộn.', 'active')",
-            "(22, 'HLV Minh Anh', 'Fitness Người mới', 'Cơ bản', '500 kcal', 'Thứ 3 / 5 / 7', 'pt_minh_anh', 'Hướng dẫn tận tình kỹ thuật chuẩn cho người mới bắt đầu làm quen với Gym.', 'active')"
+            "(1, 'HLV AN', 'Bodybuilding', 'Ngực - Tay sau', '850 kcal', 'Thứ 2 / 4 / 6', 'pt_an', 'Chuyên gia xây dựng cơ bắp chuyên sâu.', 'active')",
+            "(2, 'HLV Quỳnh Anh', 'Fitness Nữ', 'Mông - Đùi', '720 kcal', 'Thứ 3 / 5 / 7', 'pt_quynh_anh', 'Huấn luyện viên chuyên biệt cho nữ giới.', 'active')",
+            "(16, 'HLV Tiến', 'Sức mạnh (Strength)', 'Full Body', '900 kcal', 'Hàng ngày', 'pt_tien', 'Tập trung vào các bài tập sức mạnh cơ bản.', 'active')",
+            "(17, 'HLV Trí', 'Calisthenics', 'Lưng - Bụng', '650 kcal', 'Thứ 2 / 3 / 5 / 6', 'pt_tri', 'Chuyên gia tập luyện với trọng lượng cơ thể.', 'active')",
+            "(18, 'HLV Nhi', 'Yoga & Pilates', 'Toàn thân', '450 kcal', 'Thứ 3 / 5 / CN', 'pt_nhi', 'Giúp bạn tìm lại sự cân bằng cơ thể.', 'active')",
+            "(19, 'HLV Tony', 'HIIT', 'Toàn thân', '1000 kcal', 'Mỗi ngày', 'pt_tony', 'Đốt cháy mỡ thừa tối đa.', 'active')",
+            "(20, 'HLV Jenny', 'Pilates & Core', 'Bụng - Eo', '750 kcal', 'Thứ 2 / 4 / 6 / 7', 'pt_jenny', 'Chuyên giáo án giảm mỡ bụng nhanh.', 'active')",
+            "(21, 'HLV Minh Anh', 'Cardio', 'Tim mạch', '500 kcal', 'Thứ 3 / 5 / 7', 'pt_minh_anh', 'Hướng dẫn kỹ thuật chuẩn cho người mới.', 'active')",
+            "(22, 'HLV Bảo Ngọc', 'Fitness Cơ bản', 'Toàn thân', '480 kcal', 'Thứ 2 / 4 / 6', 'pt_bao_ngoc', 'Nhẹ nhàng và hiệu quả cho người mới.', 'active')",
+            "(23, 'HLV Hoàng Nam', 'Tăng cơ sâu', 'Ngực - Vai', '880 kcal', 'Thứ 3 / 5 / 7', 'pt_hoang_nam', 'Phát triển hình thể chuẩn mực.', 'active')",
+            "(24, 'HLV Quốc Huy', 'Boxing', 'Combat', '950 kcal', 'Hàng ngày', 'pt_quoc_huy', 'Kỹ thuật võ thuật và phản xạ.', 'active')",
+            "(25, 'HLV Kim Chi', 'Phục hồi', 'Giãn cơ', '300 kcal', 'Thứ 2 / 4 / 6', 'pt_kim_chi', 'Phục hồi sau chấn thương.', 'active')",
+            "(26, 'HLV Tuấn Kiệt', 'Street Workout', 'Toàn thân', '800 kcal', 'Thứ 3 / 5 / 7', 'pt_tuan_kiet', 'Sức mạnh bùng nổ ngoài trời.', 'active')",
+            "(27, 'HLV Lan Hương', 'Thể dục nhẹ', 'Toàn thân', '400 kcal', 'Thứ 2 / 4 / 6', 'pt_lan_huong', 'Sức khỏe dẻo dai mỗi ngày.', 'active')"
         )
         for (t in trainers) {
             db.execSQL("INSERT INTO $TABLE_TRAINERS (id, name, specialty, muscle, calories, schedule_text, image, description, status) VALUES $t")

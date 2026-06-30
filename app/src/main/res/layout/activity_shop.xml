@@ -1,78 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#121212">
 
-    <include layout="@layout/toolbar_fitbody" />
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/edtSearch"
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_card_home"
-            android:hint="Tìm kiếm sản phẩm..."
-            android:paddingHorizontal="16dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#888888"
-            android:textSize="14sp" />
+        <include layout="@layout/toolbar_fitbody" />
 
-        <ImageButton
-            android:id="@+id/btnCart"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginStart="12dp"
-            android:background="@drawable/bg_card_home"
-            android:src="@android:drawable/ic_menu_search"
-            app:tint="#FFFFFF" />
-    </LinearLayout>
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:paddingBottom="8dp">
         <LinearLayout
-            android:id="@+id/layoutCategories"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp">
-            <!-- Categories will be added dynamically or hardcoded for now -->
-            <TextView style="@style/CategoryTabStyle" android:text="Tất cả" android:background="@drawable/bg_card_service"/>
-            <TextView style="@style/CategoryTabStyle" android:text="Protein" />
-            <TextView style="@style/CategoryTabStyle" android:text="Tăng cân" />
-            <TextView style="@style/CategoryTabStyle" android:text="Giảm mỡ" />
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/edtSearch"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_home"
+                android:hint="Tìm kiếm sản phẩm..."
+                android:paddingHorizontal="16dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#888888"
+                android:textSize="14sp" />
         </LinearLayout>
-    </HorizontalScrollView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerProducts"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp"
-        android:clipToPadding="false"/>
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingBottom="8dp">
+            <LinearLayout
+                android:id="@+id/layoutCategories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp">
+                <TextView android:id="@+id/catAll" style="@style/CategoryTabStyle" android:text="Tất cả" android:background="@drawable/bg_card_service"/>
+                <TextView android:id="@+id/catProtein" style="@style/CategoryTabStyle" android:text="Protein" />
+                <TextView android:id="@+id/catGain" style="@style/CategoryTabStyle" android:text="Tăng cân" />
+                <TextView android:id="@+id/catLoss" style="@style/CategoryTabStyle" android:text="Giảm mỡ" />
+                <TextView android:id="@+id/catPower" style="@style/CategoryTabStyle" android:text="Sức mạnh" />
+            </LinearLayout>
+        </HorizontalScrollView>
 
-    <!-- THANH PHÂN TRANG -->
-    <LinearLayout
-        android:id="@+id/layoutPagination"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:background="#1E1E1E">
-        <!-- Nút 1, 2, 3 sẽ được tạo ở đây -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerProducts"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:clipToPadding="false"/>
+
+        <LinearLayout
+            android:id="@+id/layoutPagination"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:background="#1E1E1E"/>
     </LinearLayout>
 
-</LinearLayout>
+    <!-- NÚT GIỎ HÀNG NỔI -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabCart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="#7C4DFF"
+        app:tint="#FFFFFF"
+        android:contentDescription="Giỏ hàng" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

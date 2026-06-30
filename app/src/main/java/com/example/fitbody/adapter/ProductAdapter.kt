@@ -48,8 +48,11 @@ class ProductAdapter(
 
         holder.badgeGift.visibility = if (item.hasGift) View.VISIBLE else View.GONE
 
-        Glide.with(holder.itemView.context)
-            .load(item.image)
+        val context = holder.itemView.context
+        val resId = context.resources.getIdentifier(item.image, "drawable", context.packageName)
+
+        Glide.with(context)
+            .load(if (resId != 0) resId else item.image)
             .placeholder(R.drawable.ic_launcher_background)
             .into(holder.imgProduct)
 

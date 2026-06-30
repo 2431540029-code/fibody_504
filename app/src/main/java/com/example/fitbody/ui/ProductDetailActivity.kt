@@ -77,8 +77,10 @@ class ProductDetailActivity : AppCompatActivity() {
         
         layoutGiftDetail.visibility = if (gift) View.VISIBLE else View.GONE
 
+        // Sửa logic tải ảnh từ Resource giống trang Shop
+        val resId = resources.getIdentifier(image, "drawable", packageName)
         Glide.with(this)
-            .load(image)
+            .load(if (resId != 0) resId else image)
             .placeholder(R.drawable.ic_launcher_background)
             .into(imgProductDetail)
     }

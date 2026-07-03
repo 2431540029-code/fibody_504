@@ -1,83 +1,64 @@
 package com.example.fitbody.ui
 
 import android.os.Bundle
-import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.fitbody.R
 import com.example.fitbody.database.DatabaseHelper
 import com.example.fitbody.utils.SessionManager
+import java.util.Locale
 
 class WorkoutStatsActivity : AppCompatActivity() {
 
-    private lateinit var btnBack: TextView
-    private lateinit var txtTitle: TextView
-    private lateinit var txtTotalWorkout: TextView
+    private lateinit var txtTotalWorkouts: TextView
+    private lateinit var txtTotalMinutes: TextView
     private lateinit var txtTotalCalories: TextView
     private lateinit var txtStreak: TextView
-    private lateinit var txtMonthPercent: TextView
-    private lateinit var txtAdvice: TextView
-    private lateinit var progressMonth: ProgressBar
-
-    private var userId: Int = 0
+    private lateinit var txtMotivation: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout_stats)
 
-        btnBack = findViewById(R.id.btnBack)
-        txtTitle = findViewById(R.id.txtTitle)
-        txtTotalWorkout = findViewById(R.id.txtTotalWorkout)
-        txtTotalCalories = findViewById(R.id.txtTotalCalories)
-        txtStreak = findViewById(R.id.txtStreak)
-        txtMonthPercent = findViewById(R.id.txtMonthPercent)
-        txtAdvice = findViewById(R.id.txtAdvice)
-        progressMonth = findViewById(R.id.progressMonth)
+        initViews()
+        loadRealStats()
 
-        txtTitle.text = "Tiến độ tập luyện"
-
-        val session = SessionManager(this)
-        userId = session.getUserId()
-
-        btnBack.setOnClickListener {
-            finish()
-        }
-
-        if (userId == 0) {
-            Toast.makeText(
-                this,
-                "Bạn cần đăng nhập lại",
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-
-        loadWorkoutStats()
+        findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
     }
 
-    private fun loadWorkoutStats() {
+    private fun initViews() {
+        txtTotalWorkouts = findViewById(R.id.txtTotalWorkouts)
+        txtTotalMinutes = findViewById(R.id.txtTotalMinutes)
+        txtTotalCalories = findViewById(R.id.txtTotalCalories)
+        txtStreak = findViewById(R.id.txtStreak)
+        txtMotivation = findViewById(R.id.txtMotivation)
+        findViewById<TextView>(R.id.txtTitle).text = "Thống Kê Cá Nhân"
+    }
+
+    private fun loadRealStats() {
+        val userId = SessionManager(this).getUserId()
         val dbHelper = DatabaseHelper(this)
-        val data = dbHelper.getWorkoutStats(userId)
+        
+        // Dữ liệu thật từ Database
+        val checkInList = dbHelper.getCheckInHistoryList(userId)
+        val totalSessions = checkInList.size
+        
+        // Tính toán dựa trên dữ liệu thật
+        val totalMinutes = totalSessions * 45 // Giả định 45p/buổi
+        val totalCalories = totalSessions * 300 // Giả định 300kcal/buổi
+        val streak = if (totalSessions > 0) totalSessions else 0 // Giả định streak đơn giản
 
-        txtTotalWorkout.text = data.total_workouts.toString()
-        txtTotalCalories.text = data.total_calories.toString()
-        txtStreak.text = "${data.streak_days} ngày 🔥"
-        txtMonthPercent.text = "${data.month_progress}% mục tiêu tháng"
-        progressMonth.progress = data.month_progress
-
-        txtAdvice.text = when {
-            data.total_workouts == 0 ->
-                "Bạn chưa có buổi tập nào. Hãy bắt đầu check-in buổi đầu tiên nhé."
-
-            data.month_progress >= 80 ->
-                "Rất tốt! Bạn đang gần hoàn thành mục tiêu tháng."
-
-            data.month_progress >= 50 ->
-                "Bạn đang làm khá tốt, hãy duy trì lịch tập đều hơn."
-
-            else ->
-                "Bạn nên tập đều hơn để cải thiện tiến độ tháng."
+        txtTotalWorkouts.text = totalSessions.toString()
+        txtTotalMinutes.text = String.format(Locale.getDefault(), "%d Phút", totalMinutes)
+        txtTotalCalories.text = String.format(Locale.getDefault(), "%d Kcal", totalCalories)
+        txtStreak.text = String.format(Locale.getDefault(), "%d Ngày 🔥", streak)
+        
+        // Lời khuyên động viên
+        txtMotivation.text = when {
+            totalSessions == 0 -> "Hành trình vạn dặm bắt đầu từ bước chân đầu tiên. Hãy thực hiện buổi tập ngay hôm nay!"
+            totalSessions < 5 -> "Khởi đầu tuyệt vời! Hãy duy trì thêm 3 buổi nữa để hình thành thói quen nhé."
+            totalSessions < 15 -> "Bạn đang làm rất tốt! Cơ thể bạn đang trong quá trình chuyển hóa mạnh mẽ."
+            else -> "Phong độ đỉnh cao! Bạn đang truyền cảm hứng cho cộng đồng FitBody đấy."
         }
     }
 }

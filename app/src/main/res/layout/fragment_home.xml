@@ -40,6 +40,22 @@
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="16sp" />
 
+                <!-- THANH TÌM KIẾM HLV -->
+                <EditText
+                    android:id="@+id/edtSearchTrainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_card_home"
+                    android:hint="Tìm HLV hoặc bộ môn tập luyện..."
+                    android:paddingHorizontal="16dp"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#888888"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="24dp"
+                    android:drawableStart="@android:drawable/ic_menu_search"
+                    android:drawablePadding="10dp"
+                    android:inputType="text"/>
+
                 <!-- NHÓM: THEO DÕI SỨC KHỎE -->
                 <TextView
                     android:layout_width="wrap_content"

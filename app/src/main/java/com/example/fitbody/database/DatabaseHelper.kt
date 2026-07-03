@@ -884,13 +884,10 @@ class DatabaseHelper(context: Context) :
         if (cursor.moveToFirst()) {
             do {
                 list.add(com.example.fitbody.model.OrderItem(
-                    cursor.getInt(0),
-                    cursor.getInt(1),
-                    cursor.getInt(2),
-                    cursor.getString(5),
-                    cursor.getString(6),
-                    cursor.getInt(3),
-                    cursor.getInt(4)
+                    cursor.getInt(0), cursor.getInt(1), cursor.getInt(2),
+                    cursor.getString(cursor.getColumnIndexOrThrow("name")),
+                    cursor.getString(cursor.getColumnIndexOrThrow("image")),
+                    cursor.getInt(3), cursor.getInt(4)
                 ))
             } while (cursor.moveToNext())
         }

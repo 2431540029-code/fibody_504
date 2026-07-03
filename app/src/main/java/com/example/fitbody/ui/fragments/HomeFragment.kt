@@ -56,6 +56,25 @@ class HomeFragment : Fragment() {
         setupHomeMenu(view)
         setupObservers()
 
+        // Tìm kiếm HLV
+        view.findViewById<android.widget.EditText>(R.id.edtSearchTrainer).addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s.toString()
+                val filtered = trainerListAll.filter { 
+                    it.name.contains(query, ignoreCase = true) || it.specialty.contains(query, ignoreCase = true)
+                }
+                recyclerTrainerAll.adapter = TrainerAdapter(ArrayList(filtered), { t ->
+                    val intent = Intent(requireContext(), com.example.fitbody.ui.detail.TrainerDetailActivity::class.java)
+                    intent.putExtra("trainer_id", t.id)
+                    intent.putExtra("trainer_name", t.name)
+                    intent.putExtra("trainer_image", t.image)
+                    startActivity(intent)
+                }, { t -> addFavorite(t.id) }, { t -> toggleLike(t) })
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
         // Xử lý nút Liên hệ nổi
         val fabContact = view.findViewById<com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton>(R.id.fabContact)
         fabContact.setOnClickListener {

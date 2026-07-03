@@ -55,6 +55,28 @@ class ShopActivity : AppCompatActivity() {
         recyclerProducts = findViewById(R.id.recyclerProducts)
         layoutPagination = findViewById(R.id.layoutPagination)
         txtTitle.text = "Cửa Hàng Thực Phẩm"
+
+        // Xử lý tìm kiếm
+        findViewById<android.widget.EditText>(R.id.edtSearch).addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                filterSearch(s.toString())
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+    }
+
+    private fun filterSearch(query: String) {
+        val dbHelper = DatabaseHelper(this)
+        val allProducts = dbHelper.getProductsByPage(1, 100)
+        val filtered = allProducts.filter { it.name.contains(query, ignoreCase = true) }
+        
+        productList.clear()
+        productList.addAll(filtered.take(pageSize))
+        adapter.notifyDataSetChanged()
+        
+        // Ẩn phân trang khi đang tìm kiếm để tránh rối
+        layoutPagination.visibility = if (query.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun setupCategoryFilters() {

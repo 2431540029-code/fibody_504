@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212">
@@ -22,147 +22,161 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tiến độ tập luyện"
+                android:text="Thống kê tập luyện"
                 android:textColor="#FFFFFF"
                 android:textSize="26sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="24dp" />
 
-            <LinearLayout
+            <!-- Stats Grid -->
+            <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="14dp">
+                android:columnCount="2"
+                android:alignmentMode="alignMargins"
+                android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="110dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical"
+                    android:layout_height="120dp"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="6dp"
                     android:background="#1E1E1E"
                     android:padding="16dp"
-                    android:gravity="center_vertical">
-
+                    android:gravity="center"
+                    android:orientation="vertical">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Buổi tập"
+                        android:text="BUỔI TẬP"
                         android:textColor="#AAAAAA"
-                        android:textSize="14sp" />
-
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
                     <TextView
-                        android:id="@+id/txtTotalWorkout"
+                        android:id="@+id/txtTotalWorkouts"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textColor="#FFFFFF"
+                        android:textColor="#00E676"
                         android:textSize="32sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="10dp" />
-
+                        android:layout_marginTop="8dp"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="110dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:orientation="vertical"
+                    android:layout_height="120dp"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="6dp"
                     android:background="#1E1E1E"
                     android:padding="16dp"
-                    android:gravity="center_vertical">
-
+                    android:gravity="center"
+                    android:orientation="vertical">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Calories"
+                        android:text="THỜI GIAN"
                         android:textColor="#AAAAAA"
-                        android:textSize="14sp" />
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/txtTotalMinutes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#2979FF"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="6dp"
+                    android:background="#1E1E1E"
+                    android:padding="16dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="CALORIES"
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
                     <TextView
                         android:id="@+id/txtTotalCalories"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
                         android:textColor="#FF5252"
-                        android:textSize="32sp"
+                        android:textSize="22sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="10dp" />
-
+                        android:layout_marginTop="8dp"/>
                 </LinearLayout>
 
-            </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="6dp"
+                    android:background="#1E1E1E"
+                    android:padding="16dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="STREAK"
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/txtStreak"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#FFD700"
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
 
-            <LinearLayout
+            </GridLayout>
+
+            <!-- Motivation / Advice Box -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="110dp"
-                android:orientation="vertical"
-                android:background="#1E1E1E"
-                android:padding="16dp"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="22dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E1E1E"
+                android:layout_marginTop="20dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Streak hiện tại"
-                    android:textColor="#AAAAAA"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/txtStreak"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 ngày 🔥"
-                    android:textColor="#FFFFFF"
-                    android:textSize="32sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="10dp" />
-
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Tiến độ tháng"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
-
-            <ProgressBar
-                android:id="@+id/progressMonth"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:max="100"
-                android:progress="0"
-                android:progressTint="#7C4DFF"
-                android:progressBackgroundTint="#444444"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:id="@+id/txtMonthPercent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="0% mục tiêu tháng"
-                android:textColor="#AAAAAA"
-                android:textSize="14sp"
-                android:layout_marginBottom="20dp" />
-
-            <TextView
-                android:id="@+id/txtAdvice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Đang tải dữ liệu..."
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:background="#1E1E1E"
-                android:padding="18dp" />
+                    android:padding="20dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎯 LỜI KHUYÊN HÔM NAY"
+                        android:textColor="#7C4DFF"
+                        android:textStyle="bold"
+                        android:textSize="14sp"/>
+                    <TextView
+                        android:id="@+id/txtMotivation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Bắt đầu tập luyện ngay hôm nay nhé!"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:lineSpacingExtra="4dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-
     </LinearLayout>
-
 </ScrollView>

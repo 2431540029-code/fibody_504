@@ -660,14 +660,19 @@ class DatabaseHelper(context: Context) :
         return count
     }
 
-    fun addToCart(userId: Int, productId: Int): Boolean {
+    fun addToCart(userId: Int, productId: Int, quantity: Int = 1): Boolean {
         val db = writableDatabase
         val cursor = db.rawQuery("SELECT quantity FROM $TABLE_CART WHERE user_id = ? AND product_id = ?", arrayOf(userId.toString(), productId.toString()))
         return if (cursor.moveToFirst()) {
-            val qty = cursor.getInt(0) + 1
+            val qty = cursor.getInt(0) + quantity
             db.update(TABLE_CART, ContentValues().apply { put("quantity", qty) }, "user_id = ? AND product_id = ?", arrayOf(userId.toString(), productId.toString())) > 0
         } else {
-            db.insert(TABLE_CART, null, ContentValues().apply { put("user_id", userId); put("product_id", productId); put("quantity", 1) }) != -1L
+            db.insert(TABLE_CART, null, ContentValues().apply { 
+                put("user_id", userId)
+                put("product_id", productId)
+                put("quantity", quantity)
+                put("is_selected", 1) 
+            }) != -1L
         }.also { cursor.close() }
     }
     

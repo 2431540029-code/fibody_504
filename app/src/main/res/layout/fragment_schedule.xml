@@ -47,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:singleSelection="true"
-            app:selectionRequired="true">
+            app:selectionRequired="false">
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipMon"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
@@ -120,7 +120,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:singleSelection="true"
-            app:selectionRequired="true">
+            app:selectionRequired="false">
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipChest"
                 style="@style/Widget.MaterialComponents.Chip.Choice"

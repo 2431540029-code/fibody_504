@@ -54,56 +54,56 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thứ 2"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipTue"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thứ 3"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipWed"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thứ 4"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipThu"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thứ 5"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipFri"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thứ 6"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipSat"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thứ 7"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipSun"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Chủ Nhật"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
         </com.google.android.material.chip.ChipGroup>
 
         <TextView
@@ -127,56 +127,56 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="💪 Ngực + Tay sau"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipBack"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🔙 Lưng + Tay trước"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipLegs"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🦵 Chân + Mông"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipShoulders"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🏋️ Vai + Bụng"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipCardio"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🏃 Cardio + Đốt mỡ"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipFullBody"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🔥 Toàn thân (Full Body)"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipRest"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="💤 Nghỉ ngơi (Rest Day)"
-                app:chipBackgroundColor="@color/card_background"
-                android:textColor="#FFFFFF"/>
+                app:chipBackgroundColor="@color/purple_chip_selector"
+                android:textColor="@color/white_chip_text_selector"/>
         </com.google.android.material.chip.ChipGroup>
 
         <Button

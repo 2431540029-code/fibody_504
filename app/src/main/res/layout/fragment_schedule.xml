@@ -1,70 +1,210 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#121212"
-    android:padding="20dp">
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="← Quay lại"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:padding="12dp"
-        android:layout_marginStart="-12dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"/>
+        android:orientation="vertical"
+        android:padding="20dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="📅 Lịch tập cá nhân"
-        android:textColor="#FFFFFF"
-        android:textSize="28sp"
-        android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Quay lại"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="12dp"
+            android:layout_marginStart="-12dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
 
-    <EditText
-        android:id="@+id/edtDayName"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:hint="Nhập thứ, ví dụ: Thứ 2"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#888888"
-        android:backgroundTint="#7C4DFF"
-        android:padding="12dp"
-        android:layout_marginTop="24dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📅 Lịch tập cá nhân"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"/>
 
-    <EditText
-        android:id="@+id/edtWorkoutPlan"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:hint="Nhập lịch tập, ví dụ: Ngực + Tay sau"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#888888"
-        android:backgroundTint="#7C4DFF"
-        android:padding="12dp"
-        android:layout_marginTop="14dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chọn ngày trong tuần"
+            android:textColor="#AAAAAA"
+            android:textSize="14sp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"/>
 
-    <Button
-        android:id="@+id/btnAddSchedule"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:text="Thêm lịch tập"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:backgroundTint="#7C4DFF"
-        android:layout_marginTop="18dp"/>
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupDays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipMon"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thứ 2"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipTue"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thứ 3"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipWed"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thứ 4"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipThu"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thứ 5"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFri"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thứ 6"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSat"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thứ 7"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSun"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chủ Nhật"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+        </com.google.android.material.chip.ChipGroup>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerSchedule"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="24dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chọn bài tập dự kiến"
+            android:textColor="#AAAAAA"
+            android:textSize="14sp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="12dp"/>
 
-</LinearLayout>
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupWorkouts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipChest"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💪 Ngực + Tay sau"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipBack"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔙 Lưng + Tay trước"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipLegs"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🦵 Chân + Mông"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipShoulders"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏋️ Vai + Bụng"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipCardio"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏃 Cardio + Đốt mỡ"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFullBody"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔥 Toàn thân (Full Body)"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipRest"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💤 Nghỉ ngơi (Rest Day)"
+                app:chipBackgroundColor="@color/card_background"
+                android:textColor="#FFFFFF"/>
+        </com.google.android.material.chip.ChipGroup>
+
+        <Button
+            android:id="@+id/btnAddSchedule"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="LƯU LỊCH TẬP"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:backgroundTint="#7C4DFF"
+            android:layout_marginTop="30dp"
+            app:cornerRadius="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Danh sách lịch tập đã lưu"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSchedule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

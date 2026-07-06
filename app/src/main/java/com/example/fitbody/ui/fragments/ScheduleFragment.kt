@@ -3,7 +3,6 @@ package com.example.fitbody.ui.fragments
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -13,15 +12,14 @@ import com.example.fitbody.R
 import com.example.fitbody.database.DatabaseHelper
 import com.example.fitbody.adapter.ScheduleAdapter
 import com.example.fitbody.utils.SessionManager
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 
 class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private lateinit var btnBack: TextView
-    private lateinit var edtDayName: EditText
-    private lateinit var edtWorkoutPlan: EditText
+    private lateinit var chipGroupDays: ChipGroup
+    private lateinit var chipGroupWorkouts: ChipGroup
     private lateinit var btnAddSchedule: Button
     private lateinit var recyclerSchedule: RecyclerView
 
@@ -29,17 +27,17 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         super.onViewCreated(view, savedInstanceState)
 
         btnBack = view.findViewById(R.id.btnBack)
-        edtDayName = view.findViewById(R.id.edtDayName)
-        edtWorkoutPlan = view.findViewById(R.id.edtWorkoutPlan)
+        chipGroupDays = view.findViewById(R.id.chipGroupDays)
+        chipGroupWorkouts = view.findViewById(R.id.chipGroupWorkouts)
         btnAddSchedule = view.findViewById(R.id.btnAddSchedule)
         recyclerSchedule = view.findViewById(R.id.recyclerSchedule)
 
         btnBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            requireActivity().finish()
         }
 
-        recyclerSchedule.layoutManager =
-            LinearLayoutManager(requireContext())
+        recyclerSchedule.layoutManager = LinearLayoutManager(requireContext())
+        recyclerSchedule.isNestedScrollingEnabled = false
 
         loadSchedule()
 
@@ -61,22 +59,26 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     }
 
     private fun addSchedule() {
-        val dayName = edtDayName.text.toString().trim()
-        val workoutPlan = edtWorkoutPlan.text.toString().trim()
+        val selectedDayId = chipGroupDays.checkedChipId
+        val selectedWorkoutId = chipGroupWorkouts.checkedChipId
 
-        if (dayName.isEmpty() || workoutPlan.isEmpty()) {
-            Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ lịch tập", Toast.LENGTH_SHORT).show()
+        if (selectedDayId == View.NO_ID || selectedWorkoutId == View.NO_ID) {
+            Toast.makeText(requireContext(), "Vui lòng chọn ngày và bài tập", Toast.LENGTH_SHORT).show()
             return
         }
+
+        val dayChip = chipGroupDays.findViewById<Chip>(selectedDayId)
+        val workoutChip = chipGroupWorkouts.findViewById<Chip>(selectedWorkoutId)
+
+        val dayName = dayChip.text.toString()
+        val workoutPlan = workoutChip.text.toString()
 
         val userId = SessionManager(requireContext()).getUserId()
         val dbHelper = DatabaseHelper(requireContext())
         val result = dbHelper.addSchedule(userId, dayName, workoutPlan)
 
         if (result != -1L) {
-            Toast.makeText(requireContext(), "Đã thêm lịch tập", Toast.LENGTH_SHORT).show()
-            edtDayName.text.clear()
-            edtWorkoutPlan.text.clear()
+            Toast.makeText(requireContext(), "Đã thêm lịch tập: $dayName", Toast.LENGTH_SHORT).show()
             loadSchedule()
         }
     }

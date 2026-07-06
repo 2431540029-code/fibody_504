@@ -51,6 +51,7 @@ class DatabaseHelper(context: Context) :
             )
         """.trimIndent())
 
+
         db.execSQL("""
             CREATE TABLE $TABLE_TRAINERS (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,

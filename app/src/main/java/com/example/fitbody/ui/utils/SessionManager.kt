@@ -94,4 +94,14 @@ class SessionManager(
             prefs.getBoolean("dark_mode_last", false)
         }
     }
+
+    fun setRemindersEnabled(enabled: Boolean) {
+        val userId = getUserId()
+        prefs.edit().putBoolean("reminders_enabled_$userId", enabled).apply()
+    }
+
+    fun isRemindersEnabled(): Boolean {
+        val userId = getUserId()
+        return prefs.getBoolean("reminders_enabled_$userId", true) // Mặc định là bật
+    }
 }

@@ -2,7 +2,9 @@ package com.example.fitbody.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +26,8 @@ class CartActivity : AppCompatActivity() {
     private lateinit var txtTotalPrice: TextView
     private lateinit var btnCheckout: Button
     private lateinit var btnOrderHistory: Button
+    private lateinit var layoutEmptyCart: LinearLayout
+    private lateinit var btnShopNow: Button
 
     private val cartList = ArrayList<CartItem>()
     private lateinit var adapter: CartAdapter
@@ -32,27 +36,32 @@ class CartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cart)
 
+        initViews()
+        setupListeners()
+        loadCart()
+    }
+
+    private fun initViews() {
         btnBack = findViewById(R.id.btnBack)
         txtTitle = findViewById(R.id.txtTitle)
         recyclerCart = findViewById(R.id.recyclerCart)
         txtTotalPrice = findViewById(R.id.txtTotalPrice)
         btnCheckout = findViewById(R.id.btnCheckout)
         btnOrderHistory = findViewById(R.id.btnOrderHistory)
+        layoutEmptyCart = findViewById(R.id.layoutEmptyCart)
+        btnShopNow = findViewById(R.id.btnShopNow)
 
         txtTitle.text = "Giỏ hàng"
-
-        adapter = CartAdapter(cartList) {
-            calculateTotal()
-        }
-
         recyclerCart.layoutManager = LinearLayoutManager(this)
+        
+        adapter = CartAdapter(cartList) { calculateTotal() }
         recyclerCart.adapter = adapter
+    }
 
+    private fun setupListeners() {
         btnBack.setOnClickListener { finish() }
-
-        btnOrderHistory.setOnClickListener {
-            startActivity(Intent(this, OrderHistoryActivity::class.java))
-        }
+        btnOrderHistory.setOnClickListener { startActivity(Intent(this, OrderHistoryActivity::class.java)) }
+        btnShopNow.setOnClickListener { finish() }
 
         btnCheckout.setOnClickListener {
             val selectedItems = cartList.filter { it.isSelected }
@@ -65,8 +74,6 @@ class CartActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
-
-        loadCart()
     }
 
     private fun loadCart() {
@@ -77,11 +84,20 @@ class CartActivity : AppCompatActivity() {
         cartList.clear()
         cartList.addAll(data)
         adapter.notifyDataSetChanged()
-        calculateTotal()
-
+        
         if (data.isEmpty()) {
-            Toast.makeText(this, "Giỏ hàng trống", Toast.LENGTH_SHORT).show()
+            recyclerCart.visibility = View.GONE
+            layoutEmptyCart.visibility = View.VISIBLE
+            btnCheckout.isEnabled = false
+            btnCheckout.alpha = 0.5f
+        } else {
+            recyclerCart.visibility = View.VISIBLE
+            layoutEmptyCart.visibility = View.GONE
+            btnCheckout.isEnabled = true
+            btnCheckout.alpha = 1.0f
         }
+        
+        calculateTotal()
     }
 
     private fun calculateTotal() {

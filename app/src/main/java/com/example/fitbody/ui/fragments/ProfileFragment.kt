@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.fitbody.R
@@ -24,88 +25,72 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private lateinit var btnLogout: Button
     private lateinit var txtProfileName: TextView
     private lateinit var txtProfileRole: TextView
-    private lateinit var btnEditProfile: Button
     private lateinit var imgAvatarProfile: CircleImageView
-
-    private lateinit var txtDarkMode: TextView
-    private lateinit var txtNotifications: TextView
+    
+    private lateinit var txtProfileBMI: TextView
+    private lateinit var txtProfileGoal: TextView
+    
+    private lateinit var layoutDarkMode: View
+    private lateinit var switchNotifications: SwitchCompat
     private lateinit var txtChangePassword: TextView
-    private lateinit var txtTerms: TextView
     private lateinit var txtContactSupport: TextView
-    private lateinit var txtVersion: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initViews(view)
+        loadProfileInfo()
+        setupListeners()
+    }
+
+    private fun initViews(view: View) {
         btnLogout = view.findViewById(R.id.btnLogout)
         txtProfileName = view.findViewById(R.id.txtProfileName)
         txtProfileRole = view.findViewById(R.id.txtProfileRole)
-        btnEditProfile = view.findViewById(R.id.txtEditProfile)
         imgAvatarProfile = view.findViewById(R.id.imgAvatarProfile)
-
-        txtDarkMode = view.findViewById(R.id.txtDarkMode)
-        txtNotifications = view.findViewById(R.id.txtNotifications)
+        
+        txtProfileBMI = view.findViewById(R.id.txtProfileBMI)
+        txtProfileGoal = view.findViewById(R.id.txtProfileGoal)
+        
+        layoutDarkMode = view.findViewById(R.id.layoutDarkMode)
+        switchNotifications = view.findViewById(R.id.switchNotifications)
         txtChangePassword = view.findViewById(R.id.txtChangePassword)
-        txtTerms = view.findViewById(R.id.txtTerms)
         txtContactSupport = view.findViewById(R.id.txtContactSupport)
-        txtVersion = view.findViewById(R.id.txtVersion)
 
-        updateDarkModeText()
-        loadProfileInfo()
+        // Cập nhật Switch từ cài đặt đã lưu
+        val session = SessionManager(requireContext())
+        switchNotifications.isChecked = session.isRemindersEnabled()
+    }
 
-        btnEditProfile.setOnClickListener {
+    private fun setupListeners() {
+        view?.findViewById<Button>(R.id.txtEditProfile)?.setOnClickListener {
             startActivity(Intent(requireContext(), EditProfileActivity::class.java))
         }
 
-        txtDarkMode.setOnClickListener {
-            toggleDarkMode()
-        }
+        layoutDarkMode.setOnClickListener { toggleDarkMode() }
 
-        txtNotifications.setOnClickListener {
-            Toast.makeText(requireContext(), "Cài đặt thông báo", Toast.LENGTH_SHORT).show()
+        switchNotifications.setOnCheckedChangeListener { _, isChecked ->
+            SessionManager(requireContext()).setRemindersEnabled(isChecked)
+            val msg = if (isChecked) "Đã bật nhắc nhở hàng ngày! 🔔" else "Đã tắt nhắc nhở."
+            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
         }
 
         txtChangePassword.setOnClickListener {
-            startActivity(Intent(requireContext(), com.example.fitbody.ui.ChangePasswordActivity::class.java))
-        }
-
-        txtTerms.setOnClickListener {
-            Toast.makeText(requireContext(), "Điều khoản sử dụng", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(requireContext(), ChangePasswordActivity::class.java))
         }
 
         txtContactSupport.setOnClickListener {
             startActivity(Intent(requireContext(), com.example.fitbody.ui.ContactActivity::class.java))
         }
 
-        btnLogout.setOnClickListener {
-            logout()
-        }
+        btnLogout.setOnClickListener { logout() }
     }
 
     private fun toggleDarkMode() {
         val session = SessionManager(requireContext())
-        val isCurrentlyDark = session.isDarkMode()
-        val newMode = !isCurrentlyDark
-        
+        val newMode = !session.isDarkMode()
         session.setDarkMode(newMode)
-        
-        if (newMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            Toast.makeText(requireContext(), "Đã bật chế độ tối 🌙", Toast.LENGTH_SHORT).show()
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            Toast.makeText(requireContext(), "Đã bật chế độ sáng ☀️", Toast.LENGTH_SHORT).show()
-        }
-        updateDarkModeText()
-    }
-
-    private fun updateDarkModeText() {
-        val session = SessionManager(requireContext())
-        if (session.isDarkMode()) {
-            txtDarkMode.text = "🌙 Chế độ tối: Bật"
-        } else {
-            txtDarkMode.text = "☀️ Chế độ tối: Tắt"
-        }
+        AppCompatDelegate.setDefaultNightMode(if (newMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
     }
 
     override fun onResume() {
@@ -116,42 +101,43 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private fun loadProfileInfo() {
         val session = SessionManager(requireContext())
         val userId = session.getUserId()
-
         val dbHelper = DatabaseHelper(requireContext())
-        val cursor = dbHelper.getUserProfile(userId)
 
+        // 1. Thông tin cơ bản
+        val cursor = dbHelper.getUserProfile(userId)
         if (cursor.moveToFirst()) {
-            val name = cursor.getString(0)
-            val email = cursor.getString(1)
+            txtProfileName.text = cursor.getString(0)
+            txtProfileRole.text = cursor.getString(1)
             val avatarPath = cursor.getString(2)
-            
-            txtProfileName.text = name
-            txtProfileRole.text = email
-            
-            if (!avatarPath.isNullOrEmpty()) {
-                Glide.with(this).load(File(avatarPath)).into(imgAvatarProfile)
-            } else {
-                imgAvatarProfile.setImageResource(R.drawable.ic_launcher_background)
-            }
-        } else {
-            txtProfileName.text = session.getUsername()
-            txtProfileRole.text = "Thành viên FitBody"
+            if (!avatarPath.isNullOrEmpty()) Glide.with(this).load(File(avatarPath)).into(imgAvatarProfile)
         }
         cursor.close()
+
+        // 2. Chỉ số Fitness từ Onboarding (SharedPreferences)
+        val sp = requireActivity().getSharedPreferences("onboarding_data", Context.MODE_PRIVATE)
+        val weight = sp.getString("weight_$userId", "0")?.toDoubleOrNull() ?: 0.0
+        val height = sp.getString("height_$userId", "0")?.toDoubleOrNull() ?: 1.0
+        val goal = sp.getString("goal_$userId", "Chưa thiết lập")
+        
+        if (weight > 0 && height > 0) {
+            val hM = height / 100
+            val bmi = weight / (hM * hM)
+            txtProfileBMI.text = String.format("%.1f", bmi)
+        }
+        txtProfileGoal.text = goal
     }
 
     private fun logout() {
         androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle("Đăng xuất")
-            .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
-            .setPositiveButton("Có") { _, _ ->
-                val session = SessionManager(requireContext())
-                session.logout()
-                val intent = Intent(requireContext(), LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
+            .setMessage("Hẹn gặp lại bạn vào buổi tập tới!")
+            .setPositiveButton("Đăng xuất") { _, _ ->
+                SessionManager(requireContext()).logout()
+                startActivity(Intent(requireContext(), LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                })
             }
-            .setNegativeButton("Không", null)
+            .setNegativeButton("Ở lại", null)
             .show()
     }
 }

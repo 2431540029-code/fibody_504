@@ -41,7 +41,8 @@
                     android:hint="Họ và tên"
                     android:textColor="#FFFFFF"
                     android:textColorHint="#888888"
-                    android:backgroundTint="#7C4DFF"/>
+                    android:backgroundTint="#7C4DFF"
+                    android:inputType="textPersonName"/>
 
                 <EditText
                     android:id="@+id/edtCheckoutEmail"
@@ -73,7 +74,8 @@
                     android:textColor="#FFFFFF"
                     android:textColorHint="#888888"
                     android:backgroundTint="#7C4DFF"
-                    android:layout_marginTop="12dp"/>
+                    android:layout_marginTop="12dp"
+                    android:inputType="textPostalAddress"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

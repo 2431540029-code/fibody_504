@@ -99,9 +99,12 @@ class ContactActivity : AppCompatActivity() {
             } catch (e: Exception) {}
         }
         
-        val fbCoverUrl = "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500"
+        // Ưu tiên tải ảnh fb_cover từ máy, nếu không có mới lấy ảnh mạng
+        val resIdFb = resources.getIdentifier("fb_cover", "drawable", packageName)
+        val fbCoverSource = if (resIdFb != 0) resIdFb else "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500"
+        
         com.bumptech.glide.Glide.with(this)
-            .load(fbCoverUrl)
+            .load(fbCoverSource)
             .centerCrop()
             .placeholder(R.drawable.ic_facebook)
             .into(findViewById<ImageView>(R.id.imgFacebook))

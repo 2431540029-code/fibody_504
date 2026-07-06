@@ -53,29 +53,14 @@ class HomeFragment : Fragment() {
         setupHomeMenu(view)
         setupObservers()
 
-        // Chuyển hướng sang trang tìm kiếm riêng biệt
+        // Xử lý thanh tìm kiếm: Chạm vào là mở ngay trang Tìm kiếm riêng biệt
         val edtSearch = view.findViewById<android.widget.EditText>(R.id.edtSearchTrainer)
         
+        // Không cho nhập liệu trực tiếp tại đây để tránh lag, chỉ dùng làm nút bấm
+        edtSearch.isFocusable = false
         edtSearch.setOnClickListener {
             startActivity(Intent(requireContext(), SearchActivity::class.java))
         }
-
-        edtSearch.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val query = s.toString().trim()
-                if (query.isNotEmpty() && edtSearch.isFocused) {
-                    val intent = Intent(requireContext(), SearchActivity::class.java)
-                    intent.putExtra("query", query)
-                    startActivity(intent)
-                    edtSearch.post {
-                        edtSearch.setText("")
-                        edtSearch.clearFocus()
-                    }
-                }
-            }
-            override fun afterTextChanged(s: android.text.Editable?) {}
-        })
 
         // Xử lý nút Liên hệ nổi
         val fabContact = view.findViewById<com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton>(R.id.fabContact)

@@ -32,7 +32,8 @@
         android:textColor="#FFFFFF"
         android:textColorHint="#888888"
         android:padding="14dp"
-        android:backgroundTint="#7C4DFF"/>
+        android:backgroundTint="#7C4DFF"
+        android:inputType="textPersonName"/>
 
     <EditText
         android:id="@+id/edtRegEmail"

@@ -43,31 +43,38 @@
 
         <activity
             android:name=".ui.pt.PTDashboardActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".MainActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".PtMainActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.pt.AddWorkoutActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.pt.EditWorkoutActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
 
         <activity
             android:name=".ui.CheckInActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.WorkoutTimerActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -77,6 +84,7 @@
 
         <activity
             android:name=".ui.PremiumPlanActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -91,26 +99,32 @@
 
         <activity
             android:name=".ui.WorkoutStatsActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.ProgressActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.CheckInHistoryActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.ScheduleActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.OrderHistoryActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.detail.TrainerDetailActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -120,13 +134,16 @@
 
         <activity
             android:name=".ui.pt.MyStudentsActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".ui.WorkoutSessionActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.detail.WorkoutDetailActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -146,22 +163,27 @@
 
         <activity
             android:name=".ui.ShopActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.ProductDetailActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.CartActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.UserFitnessSettingActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.ContactActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -176,10 +198,12 @@
 
         <activity
             android:name=".ui.OrderSuccessActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ui.OrderDetailActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>

@@ -367,7 +367,9 @@ class DatabaseHelper(context: Context) :
         val list = mutableListOf<Trainer>()
         val db = readableDatabase
         val query = """
-            SELECT t.*, (SELECT 1 FROM $TABLE_LIKES l WHERE l.trainer_id = t.id AND l.user_id = ?) as is_liked
+            SELECT t.*, 
+            (SELECT COUNT(*) FROM $TABLE_LIKES l WHERE l.trainer_id = t.id) as like_count,
+            (SELECT 1 FROM $TABLE_LIKES l WHERE l.trainer_id = t.id AND l.user_id = ?) as is_liked
             FROM $TABLE_TRAINERS t WHERE t.status = 'active'
         """.trimIndent()
         val cursor = db.rawQuery(query, arrayOf(userId.toString()))
@@ -407,7 +409,9 @@ class DatabaseHelper(context: Context) :
         val list = mutableListOf<Trainer>()
         val db = readableDatabase
         val query = """
-            SELECT t.*, (SELECT 1 FROM $TABLE_LIKES l WHERE l.trainer_id = t.id AND l.user_id = ?) as is_liked
+            SELECT t.*, 
+            (SELECT COUNT(*) FROM $TABLE_LIKES l WHERE l.trainer_id = t.id) as like_count,
+            (SELECT 1 FROM $TABLE_LIKES l WHERE l.trainer_id = t.id AND l.user_id = ?) as is_liked
             FROM $TABLE_TRAINERS t WHERE t.status = 'active' ORDER BY like_count DESC LIMIT 3
         """.trimIndent()
         val cursor = db.rawQuery(query, arrayOf(userId.toString()))
@@ -424,8 +428,10 @@ class DatabaseHelper(context: Context) :
         val list = mutableListOf<Trainer>()
         val db = readableDatabase
         val query = """
-            SELECT t.*, (SELECT 1 FROM $TABLE_LIKES l WHERE l.trainer_id = t.id AND l.user_id = ?) as is_liked
-            FROM $TABLE_TRAINERS t WHERE t.status = 'active' ORDER BY RANDOM()
+            SELECT t.*, 
+            (SELECT COUNT(*) FROM $TABLE_LIKES l WHERE l.trainer_id = t.id) as like_count,
+            (SELECT 1 FROM $TABLE_LIKES l WHERE l.trainer_id = t.id AND l.user_id = ?) as is_liked
+            FROM $TABLE_TRAINERS t WHERE t.status = 'active' ORDER BY RANDOM() LIMIT 6
         """.trimIndent()
         val cursor = db.rawQuery(query, arrayOf(userId.toString()))
         if (cursor.moveToFirst()) {
@@ -1078,17 +1084,20 @@ class DatabaseHelper(context: Context) :
         return writableDatabase.insert(TABLE_USERS, null, ContentValues().apply { put("username", u); put("email", e); put("social_id", sid); put("provider", p); put("role", "user") })
     }
 
-    fun searchTrainers(query: String): List<com.example.fitbody.model.Trainer> {
+    fun searchTrainers(query: String, userId: Int): List<com.example.fitbody.model.Trainer> {
         val list = mutableListOf<com.example.fitbody.model.Trainer>()
         val db = readableDatabase
         val sql = """
-            SELECT DISTINCT t.* FROM $TABLE_TRAINERS t
+            SELECT DISTINCT t.*, 
+            (SELECT COUNT(*) FROM $TABLE_LIKES l WHERE l.trainer_id = t.id) as like_count,
+            (SELECT 1 FROM $TABLE_LIKES l WHERE l.trainer_id = t.id AND l.user_id = ?) as is_liked
+            FROM $TABLE_TRAINERS t
             LEFT JOIN $TABLE_WORKOUTS w ON t.id = w.trainer_id
             WHERE t.name LIKE ? OR t.specialty LIKE ? OR t.muscle LIKE ?
             OR w.workout_name LIKE ? OR w.muscle_group LIKE ?
         """.trimIndent()
         val p = "%${query.trim()}%"
-        val cursor = db.rawQuery(sql, arrayOf(p, p, p, p, p))
+        val cursor = db.rawQuery(sql, arrayOf(userId.toString(), p, p, p, p, p))
         if (cursor.moveToFirst()) {
             do {
                 list.add(cursorToTrainer(cursor))

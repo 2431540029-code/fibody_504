@@ -7,11 +7,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fitbody.R
 import com.example.fitbody.adapter.OrderItemsAdapter
 import com.example.fitbody.database.DatabaseHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -55,33 +59,37 @@ class OrderDetailActivity : AppCompatActivity() {
     private fun loadOrder() {
         val orderId = intent.getIntExtra("order_id", 0)
         val dbHelper = DatabaseHelper(this)
-        val order = dbHelper.getOrderById(orderId)
+        
+        lifecycleScope.launch(Dispatchers.IO) {
+            val order = dbHelper.getOrderById(orderId)
+            withContext(Dispatchers.Main) {
+                order?.let { o ->
+                    txtStatus.text = "Trạng thái: ${o.status}"
+                    txtReceiver.text = "${o.receiverName} - ${o.receiverPhone}"
+                    txtAddress.text = o.receiverAddress
+                    txtEst.text = "Dự kiến nhận hàng: ${o.estimatedDelivery}"
+                    
+                    val formatter = NumberFormat.getInstance(Locale("vi", "VN"))
+                    txtTotal.text = "${formatter.format(o.totalPrice)}đ"
+                    findViewById<TextView>(R.id.txtSubtotal).text = "${formatter.format(o.totalPrice)}đ"
+                    txtPayment.text = "Phương thức: ${o.paymentMethod}"
 
-        order?.let { o ->
-            txtStatus.text = "Trạng thái: ${o.status}"
-            txtReceiver.text = "${o.receiverName} - ${o.receiverPhone}"
-            txtAddress.text = o.receiverAddress
-            txtEst.text = "Dự kiến nhận hàng: ${o.estimatedDelivery}"
-            
-            val formatter = NumberFormat.getInstance(Locale("vi", "VN"))
-            txtTotal.text = "${formatter.format(o.totalPrice)}đ"
-            findViewById<TextView>(R.id.txtSubtotal).text = "${formatter.format(o.totalPrice)}đ"
-            txtPayment.text = "Phương thức: ${o.paymentMethod}"
-
-            if (o.status == "Đang xử lý") {
-                btnCancel.visibility = View.VISIBLE
-                btnCancel.setOnClickListener { showCancelDialog(o.id) }
-                
-                if (o.paymentMethod != "Tiền mặt (COD)") {
-                    btnRefund.visibility = View.VISIBLE
-                    btnRefund.setOnClickListener { showRefundDialog(o.id) }
+                    if (o.status == "Đang xử lý") {
+                        btnCancel.visibility = View.VISIBLE
+                        btnCancel.setOnClickListener { showCancelDialog(o.id) }
+                        
+                        if (o.paymentMethod != "Tiền mặt (COD)") {
+                            btnRefund.visibility = View.VISIBLE
+                            btnRefund.setOnClickListener { showRefundDialog(o.id) }
+                        }
+                    } else {
+                        btnCancel.visibility = View.GONE
+                        btnRefund.visibility = View.GONE
+                    }
+                    
+                    rvItems.adapter = OrderItemsAdapter(o.items)
                 }
-            } else {
-                btnCancel.visibility = View.GONE
-                btnRefund.visibility = View.GONE
             }
-            
-            rvItems.adapter = OrderItemsAdapter(o.items)
         }
     }
 
@@ -90,9 +98,13 @@ class OrderDetailActivity : AppCompatActivity() {
             .setTitle("Hủy đơn hàng")
             .setMessage("Bạn có chắc chắn muốn hủy đơn hàng này không?")
             .setPositiveButton("Xác nhận") { _, _ ->
-                DatabaseHelper(this).updateOrderStatus(orderId, "Đã hủy")
-                Toast.makeText(this, "Đơn hàng đã được hủy", Toast.LENGTH_SHORT).show()
-                loadOrder()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    DatabaseHelper(this@OrderDetailActivity).updateOrderStatus(orderId, "Đã hủy")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@OrderDetailActivity, "Đơn hàng đã được hủy", Toast.LENGTH_SHORT).show()
+                        loadOrder()
+                    }
+                }
             }
             .setNegativeButton("Quay lại", null)
             .show()
@@ -103,9 +115,13 @@ class OrderDetailActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Lý do hoàn tiền")
             .setItems(reasons) { _, which ->
-                DatabaseHelper(this).updateOrderStatus(orderId, "Yêu cầu hoàn tiền", reasons[which])
-                Toast.makeText(this, "Yêu cầu hoàn tiền đã được gửi!", Toast.LENGTH_LONG).show()
-                loadOrder()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    DatabaseHelper(this@OrderDetailActivity).updateOrderStatus(orderId, "Yêu cầu hoàn tiền", reasons[which])
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@OrderDetailActivity, "Yêu cầu hoàn tiền đã được gửi!", Toast.LENGTH_LONG).show()
+                        loadOrder()
+                    }
+                }
             }
             .show()
     }

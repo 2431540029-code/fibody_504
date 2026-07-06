@@ -138,25 +138,21 @@
                     android:id="@+id/btnMomo"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:src="@drawable/ic_launcher_background"
+                    android:src="@drawable/logo_momo"
                     android:background="@drawable/bg_card_home"
+                    android:scaleType="centerInside"
                     android:padding="8dp"
-                    android:layout_marginEnd="16dp"/>
-                <ImageButton
-                    android:id="@+id/btnBaoKim"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_launcher_background"
-                    android:background="@drawable/bg_card_home"
-                    android:padding="8dp"
-                    android:layout_marginEnd="16dp"/>
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="Thanh toán qua Momo"/>
                 <ImageButton
                     android:id="@+id/btnBankApp"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:src="@drawable/ic_launcher_background"
+                    android:src="@drawable/logo_vcb"
                     android:background="@drawable/bg_card_home"
-                    android:padding="8dp"/>
+                    android:scaleType="centerInside"
+                    android:padding="8dp"
+                    android:contentDescription="Thanh toán qua Ngân hàng"/>
             </LinearLayout>
         </LinearLayout>
 

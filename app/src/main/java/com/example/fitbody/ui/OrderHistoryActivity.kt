@@ -3,12 +3,16 @@ package com.example.fitbody.ui
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fitbody.R
 import com.example.fitbody.adapter.OrderAdapter
 import com.example.fitbody.database.DatabaseHelper
 import com.example.fitbody.utils.SessionManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class OrderHistoryActivity : AppCompatActivity() {
 
@@ -34,9 +38,13 @@ class OrderHistoryActivity : AppCompatActivity() {
     private fun loadOrderHistory() {
         val userId = SessionManager(this).getUserId()
         val dbHelper = DatabaseHelper(this)
-        val orders = dbHelper.getOrderHistory(userId)
-
-        recyclerOrderHistory.layoutManager = LinearLayoutManager(this)
-        recyclerOrderHistory.adapter = OrderAdapter(orders)
+        
+        lifecycleScope.launch(Dispatchers.IO) {
+            val orders = dbHelper.getOrderHistory(userId)
+            withContext(Dispatchers.Main) {
+                recyclerOrderHistory.layoutManager = LinearLayoutManager(this@OrderHistoryActivity)
+                recyclerOrderHistory.adapter = OrderAdapter(orders)
+            }
+        }
     }
 }

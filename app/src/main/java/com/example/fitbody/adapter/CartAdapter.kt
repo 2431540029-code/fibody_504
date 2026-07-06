@@ -62,23 +62,35 @@ class CartAdapter(
         holder.btnMinus.setOnClickListener {
             if (item.quantity > 1) {
                 item.quantity -= 1
-                dbHelper.writableDatabase.execSQL("UPDATE tbl_cart SET quantity = ? WHERE id = ?", arrayOf(item.quantity, item.id))
+                updateQuantityInDb(dbHelper, item.id, item.quantity)
                 notifyItemChanged(position)
                 onDataChanged()
             } else {
-                dbHelper.writableDatabase.delete("tbl_cart", "id = ?", arrayOf(item.id.toString()))
-                (cartList as MutableList).removeAt(position)
-                notifyDataSetChanged() // Easier to just reload everything on delete
-                onDataChanged()
+                androidx.appcompat.app.AlertDialog.Builder(context)
+                    .setTitle("Xóa sản phẩm")
+                    .setMessage("Bạn muốn xóa ${item.name} khỏi giỏ hàng?")
+                    .setPositiveButton("Xóa") { _, _ ->
+                        dbHelper.writableDatabase.delete("tbl_cart", "id = ?", arrayOf(item.id.toString()))
+                        (cartList as MutableList).removeAt(position)
+                        notifyDataSetChanged()
+                        onDataChanged()
+                    }
+                    .setNegativeButton("Hủy", null)
+                    .show()
             }
         }
 
         holder.btnPlus.setOnClickListener {
             item.quantity += 1
-            dbHelper.writableDatabase.execSQL("UPDATE tbl_cart SET quantity = ? WHERE id = ?", arrayOf(item.quantity, item.id))
+            updateQuantityInDb(dbHelper, item.id, item.quantity)
             notifyItemChanged(position)
             onDataChanged()
         }
+    }
+
+    private fun updateQuantityInDb(dbHelper: DatabaseHelper, id: Int, qty: Int) {
+        val values = android.content.ContentValues().apply { put("quantity", qty) }
+        dbHelper.writableDatabase.update("tbl_cart", values, "id = ?", arrayOf(id.toString()))
     }
 
     override fun getItemCount(): Int = cartList.size

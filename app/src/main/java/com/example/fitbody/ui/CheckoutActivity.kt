@@ -5,10 +5,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.fitbody.R
 import com.example.fitbody.database.DatabaseHelper
+import com.example.fitbody.model.CartItem
 import com.example.fitbody.utils.SessionManager
 import java.text.NumberFormat
 import java.util.Locale
@@ -25,7 +27,7 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var layoutPaymentApps: LinearLayout
     
     private var totalPrice = 0
-    private var isPaid = false // Giả lập trạng thái đã thanh toán online
+    private var isConfirmedPaid = false 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val session = SessionManager(this)
@@ -62,8 +64,7 @@ class CheckoutActivity : AppCompatActivity() {
         rgPayment.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId == R.id.rbBank) {
                 layoutPaymentApps.visibility = View.VISIBLE
-                btnConfirm.isEnabled = false // Khóa nút nếu chưa nhấn vào app thanh toán
-                btnConfirm.alpha = 0.5f
+                updateConfirmButtonState()
             } else {
                 layoutPaymentApps.visibility = View.GONE
                 btnConfirm.isEnabled = true
@@ -71,31 +72,51 @@ class CheckoutActivity : AppCompatActivity() {
             }
         }
 
-        // Mô phỏng nhấn vào Momo
         findViewById<ImageButton>(R.id.btnMomo).setOnClickListener {
-            openPaymentApp("com.mservice.momotransfer", "https://momo.vn")
+            openPaymentAppAndVerify("com.mservice.momotransfer", "https://momo.vn")
         }
 
-        // Mô phỏng nhấn vào app Ngân hàng (VCB chẳng hạn)
         findViewById<ImageButton>(R.id.btnBankApp).setOnClickListener {
-            openPaymentApp("com.vietcombank.mobilebanking", "https://vietcombank.com.vn")
+            openPaymentAppAndVerify("com.vietcombank.mobilebanking", "https://vietcombank.com.vn")
         }
     }
 
-    private fun openPaymentApp(packageName: String, webFallback: String) {
-        val intent = packageManager.getLaunchIntentForPackage(packageName)
-        if (intent != null) {
-            startActivity(intent)
-        } else {
-            // Nếu không có app thì mở trang web
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(webFallback)))
+    private fun updateConfirmButtonState() {
+        if (rgPayment.checkedRadioButtonId == R.id.rbBank) {
+            btnConfirm.isEnabled = isConfirmedPaid
+            btnConfirm.alpha = if (isConfirmedPaid) 1.0f else 0.5f
         }
-        
-        // Sau khi mở app, coi như đã thanh toán (để demo)
-        isPaid = true
-        btnConfirm.isEnabled = true
-        btnConfirm.alpha = 1.0f
-        Toast.makeText(this, "Vui lòng hoàn tất giao dịch trên ứng dụng và quay lại đây!", Toast.LENGTH_LONG).show()
+    }
+
+    private fun openPaymentAppAndVerify(packageName: String, webFallback: String) {
+        val intent = packageManager.getLaunchIntentForPackage(packageName)
+        try {
+            if (intent != null) startActivity(intent)
+            else startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(webFallback)))
+        } catch (e: Exception) {}
+
+        // Khi người dùng quay lại từ app thanh toán, hiện Dialog xác nhận
+        window.decorView.postDelayed({
+            showPaymentConfirmationDialog()
+        }, 1000)
+    }
+
+    private fun showPaymentConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Xác nhận thanh toán")
+            .setMessage("Bạn đã hoàn tất việc chuyển khoản trên ứng dụng chưa?")
+            .setCancelable(false)
+            .setPositiveButton("Đã chuyển khoản") { _, _ ->
+                isConfirmedPaid = true
+                updateConfirmButtonState()
+                Toast.makeText(this, "Xác nhận thành công! Bạn có thể đặt hàng.", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Hủy / Chưa chuyển") { _, _ ->
+                isConfirmedPaid = false
+                updateConfirmButtonState()
+                Toast.makeText(this, "Thanh toán chưa hoàn tất. Vui lòng thử lại!", Toast.LENGTH_LONG).show()
+            }
+            .show()
     }
 
     private fun loadUserData() {
@@ -124,22 +145,40 @@ class CheckoutActivity : AppCompatActivity() {
         val address = edtAddress.text.toString().trim()
 
         if (name.isEmpty() || phone.isEmpty() || address.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin nhận hàng", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val paymentMethod = if (rgPayment.checkedRadioButtonId == R.id.rbCOD) "Tiền mặt (COD)" else "Chuyển khoản"
+        val isBank = rgPayment.checkedRadioButtonId == R.id.rbBank
+        if (isBank && !isConfirmedPaid) {
+            Toast.makeText(this, "Vui lòng thực hiện chuyển khoản trước!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val paymentMethod = if (isBank) "Chuyển khoản (Đã xác nhận)" else "Tiền mặt (COD)"
         val userId = SessionManager(this).getUserId()
         val dbHelper = DatabaseHelper(this)
         
-        val cartItems = dbHelper.getCart(userId).filter { it.isSelected }
-        val orderId = dbHelper.placeOrder(userId, totalPrice, cartItems, paymentMethod, name, phone, address)
+        val isDirectBuy = intent.getBooleanExtra("direct_buy", false)
+        val itemsToBuy = if (isDirectBuy) {
+            val prodId = intent.getIntExtra("prod_id", 0)
+            val prodQty = intent.getIntExtra("prod_qty", 1)
+            val allProd = dbHelper.getProductsByPage(1, 100)
+            val p = allProd.find { it.id == prodId }
+            if (p != null) listOf(CartItem(0, p.id, p.name, p.price, p.image, prodQty)) else emptyList()
+        } else {
+            dbHelper.getCart(userId).filter { it.isSelected }
+        }
+
+        if (itemsToBuy.isEmpty()) return
+
+        val orderId = dbHelper.placeOrder(userId, totalPrice, itemsToBuy, paymentMethod, name, phone, address)
 
         if (orderId != -1L) {
             dbHelper.updateUserProfile(userId, name, email, null, phone, address)
-            val intent = Intent(this, OrderSuccessActivity::class.java)
-            intent.putExtra("order_id", orderId.toInt())
-            startActivity(intent)
+            val successIntent = Intent(this, OrderSuccessActivity::class.java)
+            successIntent.putExtra("order_id", orderId.toInt())
+            startActivity(successIntent)
             finish()
         }
     }

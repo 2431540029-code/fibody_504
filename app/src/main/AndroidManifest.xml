@@ -170,6 +170,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.SearchActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.OrderSuccessActivity"
             android:exported="false" />
 

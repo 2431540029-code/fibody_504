@@ -1077,4 +1077,24 @@ class DatabaseHelper(context: Context) :
     fun registerSocialUser(u: String, e: String, sid: String, p: String): Long {
         return writableDatabase.insert(TABLE_USERS, null, ContentValues().apply { put("username", u); put("email", e); put("social_id", sid); put("provider", p); put("role", "user") })
     }
+
+    fun searchTrainers(query: String): List<com.example.fitbody.model.Trainer> {
+        val list = mutableListOf<com.example.fitbody.model.Trainer>()
+        val db = readableDatabase
+        val sql = """
+            SELECT DISTINCT t.* FROM $TABLE_TRAINERS t
+            LEFT JOIN $TABLE_WORKOUTS w ON t.id = w.trainer_id
+            WHERE t.name LIKE ? OR t.specialty LIKE ? OR t.muscle LIKE ?
+            OR w.workout_name LIKE ? OR w.muscle_group LIKE ?
+        """.trimIndent()
+        val p = "%${query.trim()}%"
+        val cursor = db.rawQuery(sql, arrayOf(p, p, p, p, p))
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(cursorToTrainer(cursor))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return list
+    }
 }

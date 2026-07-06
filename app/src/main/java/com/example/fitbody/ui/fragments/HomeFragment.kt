@@ -17,17 +17,14 @@ import com.example.fitbody.adapter.LeaderboardAdapter
 import com.example.fitbody.adapter.TrainerAdapter
 import com.example.fitbody.database.DatabaseHelper
 import com.example.fitbody.model.Trainer
-import com.example.fitbody.ui.BMICalculatorActivity
-import com.example.fitbody.ui.CheckInActivity
-import com.example.fitbody.ui.PremiumPlanActivity
-import com.example.fitbody.ui.ShopActivity
-import com.example.fitbody.ui.WorkoutStatsActivity
+import com.example.fitbody.ui.*
 import com.example.fitbody.ui.detail.TrainerDetailActivity
 import com.example.fitbody.ui.viewmodel.HomeViewModel
 import com.example.fitbody.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.ArrayList
 
 class HomeFragment : Fragment() {
 
@@ -56,21 +53,26 @@ class HomeFragment : Fragment() {
         setupHomeMenu(view)
         setupObservers()
 
-        // Tìm kiếm HLV
-        view.findViewById<android.widget.EditText>(R.id.edtSearchTrainer).addTextChangedListener(object : android.text.TextWatcher {
+        // Chuyển hướng sang trang tìm kiếm riêng biệt
+        val edtSearch = view.findViewById<android.widget.EditText>(R.id.edtSearchTrainer)
+        
+        edtSearch.setOnClickListener {
+            startActivity(Intent(requireContext(), SearchActivity::class.java))
+        }
+
+        edtSearch.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val query = s.toString()
-                val filtered = trainerListAll.filter { 
-                    it.name.contains(query, ignoreCase = true) || it.specialty.contains(query, ignoreCase = true)
-                }
-                recyclerTrainerAll.adapter = TrainerAdapter(ArrayList(filtered), { t ->
-                    val intent = Intent(requireContext(), com.example.fitbody.ui.detail.TrainerDetailActivity::class.java)
-                    intent.putExtra("trainer_id", t.id)
-                    intent.putExtra("trainer_name", t.name)
-                    intent.putExtra("trainer_image", t.image)
+                val query = s.toString().trim()
+                if (query.isNotEmpty() && edtSearch.isFocused) {
+                    val intent = Intent(requireContext(), SearchActivity::class.java)
+                    intent.putExtra("query", query)
                     startActivity(intent)
-                }, { t -> addFavorite(t.id) }, { t -> toggleLike(t) })
+                    edtSearch.post {
+                        edtSearch.setText("")
+                        edtSearch.clearFocus()
+                    }
+                }
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
@@ -78,18 +80,18 @@ class HomeFragment : Fragment() {
         // Xử lý nút Liên hệ nổi
         val fabContact = view.findViewById<com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton>(R.id.fabContact)
         fabContact.setOnClickListener {
-            startActivity(Intent(requireContext(), com.example.fitbody.ui.ContactActivity::class.java))
+            startActivity(Intent(requireContext(), ContactActivity::class.java))
         }
 
         // Hiệu ứng thu gọn/mở rộng nút khi cuộn trang
         val nestedScroll = view.findViewById<androidx.core.widget.NestedScrollView>(R.id.nestedScrollHome)
         nestedScroll.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
             if (scrollY > oldScrollY && fabContact.isExtended) {
-                fabContact.shrink() // Thu nhỏ khi cuộn xuống
+                fabContact.shrink()
             } else if (scrollY < oldScrollY && !fabContact.isExtended) {
-                fabContact.extend() // Mở rộng khi cuộn lên
+                fabContact.extend()
             }
-            if (scrollY == 0) fabContact.extend() // Luôn mở rộng khi ở trên cùng
+            if (scrollY == 0) fabContact.extend()
         }
 
         swipeRefreshHome.setOnRefreshListener {
@@ -150,11 +152,11 @@ class HomeFragment : Fragment() {
     private fun setupHomeMenu(view: View) {
         view.findViewById<LinearLayout>(R.id.btnBMIHome).setOnClickListener { startActivity(Intent(requireContext(), BMICalculatorActivity::class.java)) }
         view.findViewById<LinearLayout>(R.id.btnStatsHome).setOnClickListener { startActivity(Intent(requireContext(), WorkoutStatsActivity::class.java)) }
-        view.findViewById<LinearLayout>(R.id.btnProgressHome).setOnClickListener { startActivity(Intent(requireContext(), com.example.fitbody.ui.ProgressActivity::class.java)) }
+        view.findViewById<LinearLayout>(R.id.btnProgressHome).setOnClickListener { startActivity(Intent(requireContext(), ProgressActivity::class.java)) }
         
         view.findViewById<LinearLayout>(R.id.btnCheckInHome).setOnClickListener { startActivity(Intent(requireContext(), CheckInActivity::class.java)) }
-        view.findViewById<LinearLayout>(R.id.btnHistoryHome).setOnClickListener { startActivity(Intent(requireContext(), com.example.fitbody.ui.CheckInHistoryActivity::class.java)) }
-        view.findViewById<LinearLayout>(R.id.btnScheduleHome).setOnClickListener { startActivity(Intent(requireContext(), com.example.fitbody.ui.ScheduleActivity::class.java)) }
+        view.findViewById<LinearLayout>(R.id.btnHistoryHome).setOnClickListener { startActivity(Intent(requireContext(), CheckInHistoryActivity::class.java)) }
+        view.findViewById<LinearLayout>(R.id.btnScheduleHome).setOnClickListener { startActivity(Intent(requireContext(), ScheduleActivity::class.java)) }
 
         view.findViewById<LinearLayout>(R.id.btnPremiumHome).setOnClickListener { startActivity(Intent(requireContext(), PremiumPlanActivity::class.java)) }
         view.findViewById<LinearLayout>(R.id.btnShopHome).setOnClickListener { startActivity(Intent(requireContext(), ShopActivity::class.java)) }

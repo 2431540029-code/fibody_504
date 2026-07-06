@@ -1,7 +1,6 @@
 package com.example.fitbody.ui
 
 import android.content.Intent
-import android.graphics.Paint
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -103,11 +102,14 @@ class ProductDetailActivity : AppCompatActivity() {
     }
 
     private fun addToCart(qty: Int) {
-        val userId = SessionManager(this).getUserId()
-        if (userId == 0) return
+        val session = SessionManager(this)
+        val userId = session.getUserId()
+        if (userId == 0) {
+            Toast.makeText(this, "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show()
+            return
+        }
         
         val dbHelper = DatabaseHelper(this)
-        // Cần cập nhật hàm addToCart trong DB để nhận thêm tham số qty
         if (dbHelper.addToCart(userId, productId, qty)) {
             Toast.makeText(this, "Đã thêm $qty sản phẩm vào giỏ hàng", Toast.LENGTH_SHORT).show()
         }

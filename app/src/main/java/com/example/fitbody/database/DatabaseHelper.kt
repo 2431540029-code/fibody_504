@@ -128,7 +128,8 @@ class DatabaseHelper(context: Context) :
                 description TEXT,
                 category TEXT,
                 stock_status TEXT DEFAULT 'Còn hàng',
-                has_gift INTEGER DEFAULT 0
+                has_gift INTEGER DEFAULT 0,
+                stock_quantity INTEGER DEFAULT 50
             )
         """.trimIndent())
 
@@ -651,7 +652,8 @@ class DatabaseHelper(context: Context) :
                     cursor.getString(5),
                     cursor.getString(6),
                     cursor.getString(7) == "Còn hàng",
-                    cursor.getInt(8) == 1
+                    cursor.getInt(8) == 1,
+                    cursor.getInt(9) // Thêm quantity
                 ))
             } while (cursor.moveToNext())
         }

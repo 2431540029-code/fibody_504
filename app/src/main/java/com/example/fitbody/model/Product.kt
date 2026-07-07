@@ -9,5 +9,6 @@ data class Product(
     val description: String,
     val category: String,
     val isAvailable: Boolean = true,
-    val hasGift: Boolean = false
+    val hasGift: Boolean = false,
+    val stockQuantity: Int = 0 // Bổ sung số lượng kho
 )

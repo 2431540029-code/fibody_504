@@ -39,9 +39,11 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var callbackManager: CallbackManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
         val session = SessionManager(this)
         
-
+        // 1. Áp dụng chế độ màu
         try {
             val isDark = session.isDarkMode()
             val targetMode = if (isDark) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
@@ -50,24 +52,19 @@ class LoginActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {}
 
-        super.onCreate(savedInstanceState)
-
         // 2. Kiểm tra đăng nhập an toàn
         try {
             if (session.isLoggedIn() && !session.isSessionExpired()) {
                 val role = session.getRole()
-                if (role == "pt") {
-                    openPt(session.getUserId(), session.getUsername())
-                } else {
-                    openMainOrOnboarding(session.getUserId(), session.getUsername())
-                }
+                if (role == "pt") openPt(session.getUserId(), session.getUsername())
+                else openMainOrOnboarding(session.getUserId(), session.getUsername())
                 return 
             }
         } catch (e: Exception) {
-            session.logout() // Reset nếu có lỗi dữ liệu để tránh treo màn hình
+            session.logout() 
         }
 
-        // 3. Nếu chưa đăng nhập, hiển thị giao diện
+        // 3. Hiển thị giao diện
         setContentView(R.layout.activity_login)
 
         initViews()

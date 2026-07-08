@@ -4,12 +4,16 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="primary">#7C4DFF</color>
-    <color name="app_background">#FFFFFF</color>
-    <color name="card_background">#F5F5F5</color>
-    <color name="text_primary">#121212</color>
-    <color name="text_secondary">#757575</color>
+    <color name="app_background">#121212</color>
+    <color name="card_background">#1E1E1E</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#AAAAAA</color>
 
     <color name="bg_dark">#121212</color>
     <color name="purple_fitbody">#7C4DFF</color>
     <color name="ic_launcher_background">#FFFFFF</color>
+
+    <!-- Cho Chip Selector -->
+    <color name="chip_selected">#7C4DFF</color>
+    <color name="chip_unselected">#1E1E1E</color>
 </resources>

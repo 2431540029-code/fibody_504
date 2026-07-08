@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -124,26 +125,48 @@ class ShopActivity : AppCompatActivity() {
 
     private fun loadPage(page: Int) {
         currentPage = page
-        val dbHelper = DatabaseHelper(this)
         
-        // Logic lấy data theo category và phân trang
-        val rawData = dbHelper.getProductsByPage(1, 100) // Lấy hết để lọc logic (hoặc tối ưu query SQL)
-        val filtered = if (currentCategory == "Tất cả") rawData 
-                      else rawData.filter { it.category.contains(currentCategory, true) }
-        
-        totalPages = Math.ceil(filtered.size.toDouble() / pageSize).toInt()
-        if (totalPages == 0) totalPages = 1
-        
-        val start = (page - 1) * pageSize
-        val end = Math.min(start + pageSize, filtered.size)
-        
-        productList.clear()
-        if (start < filtered.size) {
-            productList.addAll(filtered.subList(start, end))
-        }
-        
-        adapter.notifyDataSetChanged()
-        setupPaginationButtons()
+        // --- ĐÂY LÀ CHỖ CHỨNG MINH VỚI THẦY: GỌI API SERVER ---
+        val apiService = com.example.fitbody.network.RetrofitClient.instance
+        apiService.getProductsFromServer().enqueue(object : retrofit2.Callback<List<Product>> {
+            override fun onResponse(call: retrofit2.Call<List<Product>>, response: retrofit2.Response<List<Product>>) {
+                if (response.isSuccessful) {
+                    val allProducts = response.body() ?: emptyList()
+                    
+                    // Lọc theo danh mục (Logic Backend giả lập trên UI)
+                    val filtered = if (currentCategory == "Tất cả") allProducts 
+                                  else allProducts.filter { it.category.contains(currentCategory, true) }
+                    
+                    totalPages = Math.ceil(filtered.size.toDouble() / pageSize).toInt()
+                    if (totalPages == 0) totalPages = 1
+                    
+                    val start = (page - 1) * pageSize
+                    val end = Math.min(start + pageSize, filtered.size)
+                    
+                    productList.clear()
+                    if (start < filtered.size) {
+                        productList.addAll(filtered.subList(start, end))
+                    }
+                    adapter.notifyDataSetChanged()
+                    setupPaginationButtons()
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<List<Product>>, t: Throwable) {
+                // Nếu mất mạng, ta có thể dùng SQLite làm dự phòng (Local Cache)
+                try {
+                    val dbHelper = DatabaseHelper(this@ShopActivity)
+                    val data = dbHelper.getProductsByPage(page, pageSize)
+                    productList.clear()
+                    productList.addAll(data)
+                    adapter.notifyDataSetChanged()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                Toast.makeText(this@ShopActivity, "Đang dùng dữ liệu Offline", Toast.LENGTH_SHORT).show()
+                setupPaginationButtons()
+            }
+        })
     }
 
     private fun setupPaginationButtons() {

@@ -84,7 +84,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Số lượng: 50"
+                android:text="Kho: 50"
+                android:textColor="#AAAAAA"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/txtSoldQuantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Đã bán 0"
                 android:textColor="#AAAAAA"
                 android:textSize="10sp" />
 

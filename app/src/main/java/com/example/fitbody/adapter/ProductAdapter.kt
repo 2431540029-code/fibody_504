@@ -40,9 +40,12 @@ class ProductAdapter(
         holder.txtStockStatus.text = if (item.isAvailable) "Còn hàng" else "Hết hàng"
         holder.txtStockStatus.setTextColor(if (item.isAvailable) 0xFF4CAF50.toInt() else 0xFFFF5252.toInt())
         
-        // Hiển thị số lượng kho
+        // Hiển thị số lượng kho và đã bán
         val txtQty = holder.itemView.findViewById<TextView>(R.id.txtStockQuantity)
         txtQty.text = "Kho: ${item.stockQuantity}"
+        
+        val txtSold = holder.itemView.findViewById<TextView>(R.id.txtSoldQuantity)
+        txtSold.text = "Đã bán: ${item.soldQuantity}"
         
         holder.txtProductPrice.text = formatter.format(item.price) + "đ"
         

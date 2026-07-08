@@ -5,4 +5,7 @@
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#AAAAAA</color>
     <color name="ic_launcher_background">#121212</color>
+
+    <color name="chip_selected">#7C4DFF</color>
+    <color name="chip_unselected">#1E1E1E</color>
 </resources>

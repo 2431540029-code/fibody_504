@@ -17,7 +17,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "fitbody.db"
-        private const val DATABASE_VERSION = 18
+        private const val DATABASE_VERSION = 19
 
         const val TABLE_USERS = "tbl_users"
         const val TABLE_TRAINERS = "tbl_trainers"
@@ -43,7 +43,7 @@ class DatabaseHelper(context: Context) :
         db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_CHECKIN (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, checkin_date TEXT, qr_code TEXT)")
         db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_FAVORITES (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, trainer_id INTEGER)")
         db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_PROGRESS (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, weight REAL, height REAL, bmi REAL, date TEXT)")
-        db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_PRODUCTS (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price INTEGER, original_price INTEGER, image TEXT, description TEXT, category TEXT, stock_status TEXT DEFAULT 'Còn hàng', has_gift INTEGER DEFAULT 0, stock_quantity INTEGER DEFAULT 50)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_PRODUCTS (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price INTEGER, original_price INTEGER, image TEXT, description TEXT, category TEXT, stock_status TEXT DEFAULT 'Còn hàng', has_gift INTEGER DEFAULT 0, stock_quantity INTEGER DEFAULT 50, sold_quantity INTEGER DEFAULT 0)")
         db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_CART (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, product_id INTEGER, quantity INTEGER DEFAULT 1, is_selected INTEGER DEFAULT 1, FOREIGN KEY(product_id) REFERENCES $TABLE_PRODUCTS(id))")
         db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_ORDERS (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, total_price INTEGER, order_date TEXT, status TEXT DEFAULT 'Đang xử lý', payment_method TEXT, receiver_name TEXT, receiver_phone TEXT, receiver_address TEXT, estimated_delivery TEXT, refund_reason TEXT, FOREIGN KEY(user_id) REFERENCES $TABLE_USERS(id))")
         db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_ORDER_ITEMS (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id INTEGER, product_id INTEGER, quantity INTEGER, price INTEGER, FOREIGN KEY(order_id) REFERENCES $TABLE_ORDERS(id), FOREIGN KEY(product_id) REFERENCES $TABLE_PRODUCTS(id))")
@@ -110,7 +110,7 @@ class DatabaseHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 18) {
+        if (oldVersion < 19) {
             db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
             db.execSQL("DROP TABLE IF EXISTS $TABLE_TRAINERS")
             db.execSQL("DROP TABLE IF EXISTS $TABLE_WORKOUTS")
@@ -131,15 +131,32 @@ class DatabaseHelper(context: Context) :
 
     private fun seedProducts(db: SQLiteDatabase) {
         val products = arrayOf(
-            "(1, 'Rule 1 - Pump (30 lần dùng)', 650000, 800000, 'prod_rule1_pump', 'Tăng sức mạnh bùng nổ.', 'Tăng sức mạnh', 'Còn hàng', 1, 50)",
-            "(2, 'Whey Gold Standard 5lbs', 1550000, 1800000, 'prod_whey_gold', 'Đạm tinh khiết tăng cơ.', 'Protein', 'Còn hàng', 1, 30)",
-            "(3, 'Mutant Mass 5lbs', 950000, 1100000, 'prod_mutant_mass', 'Sữa tăng cân cực nhanh.', 'Tăng cân', 'Còn hàng', 0, 40)",
-            "(4, 'Kirkland - Vitamin C', 640000, 750000, 'prod_vitamin_c', 'Hỗ trợ miễn dịch.', 'Sức khỏe', 'Còn hàng', 0, 100)",
-            "(5, 'BCAA Amino Energy', 850000, 950000, 'prod_bcaa', 'Tăng năng lượng tập luyện.', 'Phục hồi', 'Còn hàng', 1, 25)",
-            "(6, 'Creatine OstroVit', 550000, 650000, 'prod_creatine', 'Tăng sức mạnh cơ bắp.', 'Tăng sức mạnh', 'Còn hàng', 0, 60)"
+            // TRANG 1
+            "(1, 'Rule 1 - Pump (30 lần dùng)', 650000, 800000, 'prod_rule1_pump', 'Tăng sức mạnh bùng nổ.', 'Tăng sức mạnh', 'Còn hàng', 1, 50, 12)",
+            "(2, 'Whey Gold Standard 5lbs', 1550000, 1800000, 'prod_whey_gold', 'Đạm tinh khiết tăng cơ.', 'Protein', 'Còn hàng', 1, 30, 45)",
+            "(3, 'Mutant Mass 5lbs', 950000, 1100000, 'prod_mutant_mass', 'Sữa tăng cân cực nhanh.', 'Tăng cân', 'Còn hàng', 0, 40, 8)",
+            "(4, 'Kirkland - Vitamin C', 640000, 750000, 'prod_vitamin_c', 'Hỗ trợ miễn dịch.', 'Sức khỏe', 'Còn hàng', 0, 100, 150)",
+            "(5, 'BCAA Amino Energy', 850000, 950000, 'prod_bcaa', 'Tăng năng lượng tập luyện.', 'Phục hồi', 'Còn hàng', 1, 25, 33)",
+            "(6, 'Creatine OstroVit', 550000, 650000, 'prod_creatine', 'Tăng sức mạnh cơ bắp.', 'Tăng sức mạnh', 'Còn hàng', 0, 60, 21)",
+            
+            // TRANG 2
+            "(7, 'ISO 100 5lbs', 1950000, 2200000, 'prod_iso100', 'Whey Protein cao cấp nhất.', 'Protein', 'Còn hàng', 1, 15, 10)",
+            "(8, 'Lipo 6 Black', 750000, 850000, 'prod_lipo6', 'Viên uống đốt mỡ mạnh.', 'Giảm mỡ', 'Còn hàng', 0, 40, 56)",
+            "(9, 'Omega 3 Kirkland', 450000, 550000, 'prod_omega3', 'Tốt cho tim mạch.', 'Sức khỏe', 'Còn hàng', 0, 80, 200)",
+            "(10, 'Pre-workout ABE', 790000, 890000, 'prod_abe', 'Kích thích tập luyện.', 'Tăng sức mạnh', 'Còn hàng', 1, 35, 19)",
+            "(11, 'Glucosamine 375 viên', 750000, 850000, 'prod_glucosamine', 'Bảo vệ xương khớp.', 'Sức khỏe', 'Còn hàng', 0, 50, 42)",
+            "(12, 'Sữa tăng cân Serious Mass', 1350000, 1500000, 'prod_serious_mass', 'Tăng cân nhanh.', 'Tăng cân', 'Còn hàng', 1, 20, 15)",
+
+            // TRANG 3
+            "(13, 'Bình lắc Shaker 700ml', 150000, 200000, 'prod_shaker', 'Tiện lợi pha Protein.', 'Phụ kiện', 'Còn hàng', 0, 120, 500)",
+            "(14, 'Găng tay tập Gym', 250000, 350000, 'prod_gloves', 'Bảo vệ bàn tay.', 'Phụ kiện', 'Còn hàng', 0, 45, 89)",
+            "(15, 'Thảm tập Yoga', 450000, 600000, 'prod_yoga_mat', 'Chống trượt êm ái.', 'Phụ kiện', 'Còn hàng', 0, 30, 24)",
+            "(16, 'Đai lưng tập tạ', 550000, 700000, 'prod_belt', 'Bảo vệ cột sống.', 'Phụ kiện', 'Còn hàng', 0, 25, 13)",
+            "(17, 'Dây kéo xà Straps', 120000, 180000, 'prod_straps', 'Hỗ trợ cầm nắm tạ.', 'Phụ kiện', 'Còn hàng', 0, 100, 156)",
+            "(18, 'Ống đồng bảo vệ chân', 300000, 450000, 'prod_shin_guards', 'Dành cho võ thuật.', 'Phụ kiện', 'Còn hàng', 0, 40, 7)"
         )
         for (p in products) {
-            db.execSQL("INSERT OR IGNORE INTO $TABLE_PRODUCTS (id, name, price, original_price, image, description, category, stock_status, has_gift, stock_quantity) VALUES $p")
+            db.execSQL("INSERT OR IGNORE INTO $TABLE_PRODUCTS (id, name, price, original_price, image, description, category, stock_status, has_gift, stock_quantity, sold_quantity) VALUES $p")
         }
     }
 
@@ -320,6 +337,7 @@ class DatabaseHelper(context: Context) :
             val statusIdx = cursor.getColumnIndex("stock_status")
             val giftIdx = cursor.getColumnIndex("has_gift")
             val qtyIdx = cursor.getColumnIndex("stock_quantity")
+            val soldIdx = cursor.getColumnIndex("sold_quantity")
 
             do {
                 list.add(Product(
@@ -332,7 +350,8 @@ class DatabaseHelper(context: Context) :
                     if (catIdx != -1) cursor.getString(catIdx) else "",
                     if (statusIdx != -1) cursor.getString(statusIdx) == "Còn hàng" else true,
                     if (giftIdx != -1) cursor.getInt(giftIdx) == 1 else false,
-                    if (qtyIdx != -1) cursor.getInt(qtyIdx) else 50
+                    if (qtyIdx != -1) cursor.getInt(qtyIdx) else 50,
+                    if (soldIdx != -1) cursor.getInt(soldIdx) else 0
                 ))
             } while (cursor.moveToNext())
         }
@@ -398,6 +417,11 @@ class DatabaseHelper(context: Context) :
 
             for (item in items) {
                 db.insert(TABLE_ORDER_ITEMS, null, ContentValues().apply { put("order_id", orderId); put("product_id", item.product_id); put("quantity", item.quantity); put("price", item.price) })
+                
+                // Trừ tồn kho và tăng số lượng đã bán
+                db.execSQL("UPDATE $TABLE_PRODUCTS SET stock_quantity = MAX(0, stock_quantity - ?), sold_quantity = sold_quantity + ? WHERE id = ?", 
+                    arrayOf(item.quantity, item.quantity, item.product_id))
+
                 db.delete(TABLE_CART, "product_id = ? AND user_id = ?", arrayOf(item.product_id.toString(), userId.toString()))
             }
             db.setTransactionSuccessful(); return orderId

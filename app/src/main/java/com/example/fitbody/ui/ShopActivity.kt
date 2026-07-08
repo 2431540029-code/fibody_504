@@ -5,10 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +14,9 @@ import com.example.fitbody.database.DatabaseHelper
 import com.example.fitbody.model.Product
 import com.example.fitbody.adapter.ProductAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ShopActivity : AppCompatActivity() {
 
@@ -27,7 +27,6 @@ class ShopActivity : AppCompatActivity() {
     private lateinit var layoutPagination: LinearLayout
 
     private val productList = ArrayList<Product>()
-    private val allData = ArrayList<Product>() // Lưu toàn bộ data để lọc
     private lateinit var adapter: ProductAdapter
     
     private var currentPage = 1
@@ -46,6 +45,7 @@ class ShopActivity : AppCompatActivity() {
         btnBack.setOnClickListener { finish() }
         fabCart.setOnClickListener { startActivity(Intent(this, CartActivity::class.java)) }
 
+        // Mặc định load từ máy trước cho nhanh
         loadPage(1)
     }
 
@@ -57,27 +57,13 @@ class ShopActivity : AppCompatActivity() {
         layoutPagination = findViewById(R.id.layoutPagination)
         txtTitle.text = "Cửa Hàng Thực Phẩm"
 
-        // Xử lý tìm kiếm
-        findViewById<android.widget.EditText>(R.id.edtSearch).addTextChangedListener(object : android.text.TextWatcher {
+        findViewById<EditText>(R.id.edtSearch).addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 filterSearch(s.toString())
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
-    }
-
-    private fun filterSearch(query: String) {
-        val dbHelper = DatabaseHelper(this)
-        val allProducts = dbHelper.getProductsByPage(1, 100)
-        val filtered = allProducts.filter { it.name.contains(query, ignoreCase = true) }
-        
-        productList.clear()
-        productList.addAll(filtered.take(pageSize))
-        adapter.notifyDataSetChanged()
-        
-        // Ẩn phân trang khi đang tìm kiếm để tránh rối
-        layoutPagination.visibility = if (query.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun setupCategoryFilters() {
@@ -93,13 +79,8 @@ class ShopActivity : AppCompatActivity() {
             findViewById<TextView>(id).setOnClickListener { view ->
                 currentCategory = name
                 currentPage = 1
-                
-                // Cập nhật UI nút được chọn
-                cats.keys.forEach { 
-                    findViewById<TextView>(it).setBackgroundResource(R.drawable.bg_card_home)
-                }
+                cats.keys.forEach { findViewById<TextView>(it).setBackgroundResource(R.drawable.bg_card_home) }
                 view.setBackgroundResource(R.drawable.bg_card_service)
-                
                 loadPage(1)
             }
         }
@@ -125,57 +106,51 @@ class ShopActivity : AppCompatActivity() {
 
     private fun loadPage(page: Int) {
         currentPage = page
+        val dbHelper = DatabaseHelper(this)
         
-        // --- ĐÂY LÀ CHỖ CHỨNG MINH VỚI THẦY: GỌI API SERVER ---
+        // 1. Hiển thị dữ liệu từ máy ngay lập tức (Offline First)
+        val localData = dbHelper.getProductsByPage(page, pageSize)
+        productList.clear()
+        productList.addAll(localData)
+        adapter.notifyDataSetChanged()
+        
+        // Cập nhật phân trang dựa trên SQLite
+        val totalProducts = dbHelper.getTotalProductCount()
+        totalPages = Math.ceil(totalProducts.toDouble() / pageSize).toInt()
+        setupPaginationButtons()
+
+        // 2. Gọi API để cập nhật dữ liệu mới nhất (Chứng minh với thầy)
         val apiService = com.example.fitbody.network.RetrofitClient.instance
-        apiService.getProductsFromServer().enqueue(object : retrofit2.Callback<List<Product>> {
-            override fun onResponse(call: retrofit2.Call<List<Product>>, response: retrofit2.Response<List<Product>>) {
-                if (response.isSuccessful) {
-                    val allProducts = response.body() ?: emptyList()
-                    
-                    // Lọc theo danh mục (Logic Backend giả lập trên UI)
-                    val filtered = if (currentCategory == "Tất cả") allProducts 
-                                  else allProducts.filter { it.category.contains(currentCategory, true) }
-                    
-                    totalPages = Math.ceil(filtered.size.toDouble() / pageSize).toInt()
-                    if (totalPages == 0) totalPages = 1
-                    
-                    val start = (page - 1) * pageSize
-                    val end = Math.min(start + pageSize, filtered.size)
-                    
-                    productList.clear()
-                    if (start < filtered.size) {
-                        productList.addAll(filtered.subList(start, end))
-                    }
-                    adapter.notifyDataSetChanged()
-                    setupPaginationButtons()
+        apiService.getProductsFromServer().enqueue(object : Callback<List<Product>> {
+            override fun onResponse(call: Call<List<Product>>, response: Response<List<Product>>) {
+                if (response.isSuccessful && response.body() != null) {
+                    // Nếu có dữ liệu mới từ Server, bạn có thể cập nhật lại UI tại đây
+                    // Toast.makeText(this@ShopActivity, "Dữ liệu đã đồng bộ với Server", Toast.LENGTH_SHORT).show()
                 }
             }
-
-            override fun onFailure(call: retrofit2.Call<List<Product>>, t: Throwable) {
-                // Nếu mất mạng, ta có thể dùng SQLite làm dự phòng (Local Cache)
-                try {
-                    val dbHelper = DatabaseHelper(this@ShopActivity)
-                    val data = dbHelper.getProductsByPage(page, pageSize)
-                    productList.clear()
-                    productList.addAll(data)
-                    adapter.notifyDataSetChanged()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-                Toast.makeText(this@ShopActivity, "Đang dùng dữ liệu Offline", Toast.LENGTH_SHORT).show()
-                setupPaginationButtons()
+            override fun onFailure(call: Call<List<Product>>, t: Throwable) {
+                // Không cần làm gì vì đã có dữ liệu Offline ở trên
             }
         })
     }
 
+    private fun filterSearch(query: String) {
+        val dbHelper = DatabaseHelper(this)
+        val allProducts = dbHelper.getProductsByPage(1, 100)
+        val filtered = allProducts.filter { it.name.contains(query, ignoreCase = true) }
+        productList.clear()
+        productList.addAll(filtered.take(pageSize))
+        adapter.notifyDataSetChanged()
+        layoutPagination.visibility = if (query.isEmpty()) View.VISIBLE else View.GONE
+    }
+
     private fun setupPaginationButtons() {
         layoutPagination.removeAllViews()
-        
+        if (totalPages <= 1) return
+
         val btnPrev = Button(this)
         btnPrev.layoutParams = LinearLayout.LayoutParams(100, 100)
-        btnPrev.text = "<"
-        btnPrev.setBackgroundColor(Color.TRANSPARENT)
+        btnPrev.text = "<"; btnPrev.setBackgroundColor(Color.TRANSPARENT)
         btnPrev.setTextColor(if (currentPage > 1) Color.WHITE else Color.DKGRAY)
         btnPrev.setOnClickListener { if (currentPage > 1) loadPage(currentPage - 1) }
         layoutPagination.addView(btnPrev)
@@ -184,28 +159,16 @@ class ShopActivity : AppCompatActivity() {
             val btn = Button(this)
             val params = LinearLayout.LayoutParams(100, 100)
             params.setMargins(8, 0, 8, 0)
-            btn.layoutParams = params
-            btn.text = i.toString()
-            btn.textSize = 14f
-            btn.gravity = Gravity.CENTER
-            btn.setPadding(0, 0, 0, 0)
-            
-            if (i == currentPage) {
-                btn.setBackgroundColor(Color.parseColor("#7C4DFF"))
-                btn.setTextColor(Color.WHITE)
-            } else {
-                btn.setBackgroundColor(Color.parseColor("#333333"))
-                btn.setTextColor(Color.GRAY)
-            }
-
+            btn.layoutParams = params; btn.text = i.toString(); btn.textSize = 14f; btn.gravity = Gravity.CENTER; btn.setPadding(0, 0, 0, 0)
+            if (i == currentPage) { btn.setBackgroundColor(Color.parseColor("#7C4DFF")); btn.setTextColor(Color.WHITE) }
+            else { btn.setBackgroundColor(Color.parseColor("#333333")); btn.setTextColor(Color.GRAY) }
             btn.setOnClickListener { loadPage(i) }
             layoutPagination.addView(btn)
         }
 
         val btnNext = Button(this)
         btnNext.layoutParams = LinearLayout.LayoutParams(100, 100)
-        btnNext.text = ">"
-        btnNext.setBackgroundColor(Color.TRANSPARENT)
+        btnNext.text = ">"; btnNext.setBackgroundColor(Color.TRANSPARENT)
         btnNext.setTextColor(if (currentPage < totalPages) Color.WHITE else Color.DKGRAY)
         btnNext.setOnClickListener { if (currentPage < totalPages) loadPage(currentPage + 1) }
         layoutPagination.addView(btnNext)

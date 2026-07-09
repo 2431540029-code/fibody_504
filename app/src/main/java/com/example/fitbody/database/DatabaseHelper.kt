@@ -322,10 +322,21 @@ class DatabaseHelper(context: Context) :
         return writableDatabase.update(TABLE_USERS, v, "id = ?", arrayOf(userId.toString())) > 0
     }
 
-    fun getProductsByPage(page: Int, pageSize: Int): List<Product> {
+    fun getProductsByPage(page: Int, pageSize: Int, category: String = "Tất cả"): List<Product> {
         val list = mutableListOf<Product>()
         val offset = (page - 1) * pageSize
-        val cursor = readableDatabase.rawQuery("SELECT * FROM $TABLE_PRODUCTS LIMIT ? OFFSET ?", arrayOf(pageSize.toString(), offset.toString()))
+        val query = if (category == "Tất cả") {
+            "SELECT * FROM $TABLE_PRODUCTS LIMIT ? OFFSET ?"
+        } else {
+            "SELECT * FROM $TABLE_PRODUCTS WHERE category LIKE ? LIMIT ? OFFSET ?"
+        }
+        val args = if (category == "Tất cả") {
+            arrayOf(pageSize.toString(), offset.toString())
+        } else {
+            arrayOf("%$category%", pageSize.toString(), offset.toString())
+        }
+
+        val cursor = readableDatabase.rawQuery(query, args)
         if (cursor.moveToFirst()) {
             val idIdx = cursor.getColumnIndex("id")
             val nameIdx = cursor.getColumnIndex("name")
@@ -359,8 +370,14 @@ class DatabaseHelper(context: Context) :
         return list
     }
 
-    fun getTotalProductCount(): Int {
-        val c = readableDatabase.rawQuery("SELECT COUNT(*) FROM $TABLE_PRODUCTS", null)
+    fun getTotalProductCount(category: String = "Tất cả"): Int {
+        val query = if (category == "Tất cả") {
+            "SELECT COUNT(*) FROM $TABLE_PRODUCTS"
+        } else {
+            "SELECT COUNT(*) FROM $TABLE_PRODUCTS WHERE category LIKE ?"
+        }
+        val args = if (category == "Tất cả") null else arrayOf("%$category%")
+        val c = readableDatabase.rawQuery(query, args)
         var count = 0; if (c.moveToFirst()) count = c.getInt(0); c.close(); return count
     }
 

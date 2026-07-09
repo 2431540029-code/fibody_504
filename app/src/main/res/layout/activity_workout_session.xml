@@ -96,15 +96,51 @@
             android:layout_height="0dp"
             android:layout_weight="1"/>
 
-        <Button
-            android:id="@+id/btnAction"
+        <!-- Điều khiển: Bắt đầu / Dừng / Quay lại -->
+        <LinearLayout
+            android:id="@+id/layoutControls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="BẮT ĐẦU"
-            android:backgroundTint="#7C4DFF"
-            android:textColor="#FFFFFF"
-            android:padding="16dp"
-            android:textSize="18sp"/>
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnReset"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🔄 TẬP LẠI"
+                android:backgroundTint="#333333"
+                android:textColor="#FFFFFF"
+                android:padding="16dp"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/btnAction"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="BẮT ĐẦU"
+                android:backgroundTint="#7C4DFF"
+                android:textColor="#FFFFFF"
+                android:padding="16dp"
+                android:textSize="18sp"/>
+
+            <Button
+                android:id="@+id/btnPause"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="⏸ DỪNG"
+                android:backgroundTint="#FF5252"
+                android:textColor="#FFFFFF"
+                android:padding="16dp"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"/>
+
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Giao diện Hoàn thành (Finish Layout) -->

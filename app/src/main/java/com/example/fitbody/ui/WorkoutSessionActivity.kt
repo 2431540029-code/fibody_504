@@ -1,5 +1,6 @@
 package com.example.fitbody.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
@@ -7,6 +8,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
@@ -28,9 +30,11 @@ class WorkoutSessionActivity : AppCompatActivity() {
     private lateinit var imgWorkoutGif: ImageView
     private lateinit var layoutNext: LinearLayout
     private lateinit var txtNextWorkoutName: TextView
+    
     private lateinit var btnAction: Button
+    private lateinit var btnPause: Button
+    private lateinit var btnReset: Button
 
-    // Finish Layout components
     private lateinit var layoutSession: LinearLayout
     private lateinit var layoutFinish: LinearLayout
     private lateinit var txtTotalExercises: TextView
@@ -40,11 +44,14 @@ class WorkoutSessionActivity : AppCompatActivity() {
     private var workouts = listOf<Workout>()
     private var currentIndex = 0
     private var isResting = false
+    private var isPaused = false
     private var timer: CountDownTimer? = null
     
+    private var timeLeftInMillis: Long = 0
     private val WORK_TIME = 30000L
     private val REST_TIME = 15000L
     private var startTimeMillis: Long = 0
+    private var trainerId: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,18 +59,34 @@ class WorkoutSessionActivity : AppCompatActivity() {
 
         initViews()
 
-        val trainerId = intent.getIntExtra("trainer_id", 1)
+        trainerId = intent.getIntExtra("trainer_id", 1)
         loadWorkouts(trainerId)
 
-        btnBack.setOnClickListener { finish() }
-        btnFinish.setOnClickListener { finish() }
+        btnBack.setOnClickListener { 
+            clearSession()
+            finish() 
+        }
+        btnFinish.setOnClickListener { 
+            clearSession()
+            finish() 
+        }
 
         btnAction.setOnClickListener {
-            if (timer == null) {
+            if (isPaused) {
+                resumeWorkout()
+            } else if (timer == null) {
                 startTimeMillis = System.currentTimeMillis()
                 startNextStep()
-                btnAction.visibility = View.GONE
             }
+        }
+
+        btnPause.setOnClickListener {
+            if (!isPaused) pauseWorkout()
+            else resumeWorkout()
+        }
+
+        btnReset.setOnClickListener {
+            showResetOptions()
         }
     }
 
@@ -75,7 +98,10 @@ class WorkoutSessionActivity : AppCompatActivity() {
         imgWorkoutGif = findViewById(R.id.imgWorkoutGif)
         layoutNext = findViewById(R.id.layoutNext)
         txtNextWorkoutName = findViewById(R.id.txtNextWorkoutName)
+        
         btnAction = findViewById(R.id.btnAction)
+        btnPause = findViewById(R.id.btnPause)
+        btnReset = findViewById(R.id.btnReset)
 
         layoutSession = findViewById(R.id.layoutSession)
         layoutFinish = findViewById(R.id.layoutFinish)
@@ -84,15 +110,16 @@ class WorkoutSessionActivity : AppCompatActivity() {
         btnFinish = findViewById(R.id.btnFinish)
     }
 
-    private fun loadWorkouts(trainerId: Int) {
+    private fun loadWorkouts(id: Int) {
         val dbHelper = DatabaseHelper(this)
         lifecycleScope.launch(Dispatchers.IO) {
-            workouts = dbHelper.getWorkoutsByTrainer(trainerId)
+            workouts = dbHelper.getWorkoutsByTrainer(id)
             withContext(Dispatchers.Main) {
                 if (workouts.isEmpty()) {
                     txtWorkoutName.text = "Không có bài tập nào"
                     btnAction.isEnabled = false
                 } else {
+                    restoreSession()
                     updateUI()
                 }
             }
@@ -108,14 +135,13 @@ class WorkoutSessionActivity : AppCompatActivity() {
         if (isResting) {
             txtStatus.text = "CHUẨN BỊ BÀI TIẾP THEO"
             txtStatus.setTextColor(getColor(android.R.color.holo_orange_light))
-            txtWorkoutName.text = targetWorkout.workout_name
         } else {
             txtStatus.text = "TẬP LUYỆN!"
             txtStatus.setTextColor(getColor(android.R.color.holo_green_light))
-            txtWorkoutName.text = targetWorkout.workout_name
         }
+        txtWorkoutName.text = targetWorkout.workout_name
 
-        // Tự động làm sạch tên để tìm file GIF (bỏ dấu, thay khoảng trắng)
+        // Load GIF
         val cleanName = targetWorkout.workout_name.lowercase()
             .replace(" ", "_")
             .replace("á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ".toRegex(), "a")
@@ -133,6 +159,12 @@ class WorkoutSessionActivity : AppCompatActivity() {
             .load(if (resId != 0) resId else R.raw.bat_nhay)
             .into(imgWorkoutGif)
 
+        if (isPaused) {
+            imgWorkoutGif.alpha = 0.5f
+        } else {
+            imgWorkoutGif.alpha = 1.0f
+        }
+
         if (!isResting && currentIndex < workouts.size - 1) {
             layoutNext.visibility = View.VISIBLE
             txtNextWorkoutName.text = workouts[currentIndex + 1].workout_name
@@ -141,11 +173,86 @@ class WorkoutSessionActivity : AppCompatActivity() {
         }
     }
 
+    private fun pauseWorkout() {
+        timer?.cancel()
+        isPaused = true
+        btnPause.text = "▶ TIẾP TỤC"
+        btnPause.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getColor(android.R.color.holo_blue_light)))
+        imgWorkoutGif.alpha = 0.5f
+        saveSession()
+        Toast.makeText(this, "Đã dừng tập luyện", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun resumeWorkout() {
+        isPaused = false
+        btnPause.text = "⏸ DỪNG"
+        btnPause.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getColor(android.R.color.holo_red_light)))
+        imgWorkoutGif.alpha = 1.0f
+        startTimer(timeLeftInMillis)
+        
+        btnAction.visibility = View.GONE
+        btnPause.visibility = View.VISIBLE
+        btnReset.visibility = View.VISIBLE
+    }
+
+    private fun showResetOptions() {
+        val options = arrayOf("Tập lại bài này", "Tập lại từ đầu buổi")
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Lựa chọn tập lại")
+            .setItems(options) { _, which ->
+                if (which == 0) {
+                    resetCurrentWorkout()
+                } else {
+                    resetEntireSession()
+                }
+            }
+            .setNegativeButton("Hủy", null)
+            .show()
+    }
+
+    private fun resetCurrentWorkout() {
+        timer?.cancel()
+        isPaused = false
+        timeLeftInMillis = if (isResting) REST_TIME else WORK_TIME
+        startTimer(timeLeftInMillis)
+        updateUI()
+        
+        btnAction.visibility = View.GONE
+        btnPause.visibility = View.VISIBLE
+        btnReset.visibility = View.VISIBLE
+        btnPause.text = "⏸ DỪNG"
+        btnPause.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getColor(android.R.color.holo_red_light)))
+        Toast.makeText(this, "Đã bắt đầu lại bài tập này", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun resetEntireSession() {
+        timer?.cancel()
+        clearSession()
+        currentIndex = 0
+        isResting = false
+        isPaused = false
+        startTimeMillis = System.currentTimeMillis()
+        
+        updateUI()
+        startTimer(WORK_TIME)
+        
+        btnAction.visibility = View.GONE
+        btnPause.visibility = View.VISIBLE
+        btnReset.visibility = View.VISIBLE
+        btnPause.text = "⏸ DỪNG"
+        btnPause.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getColor(android.R.color.holo_red_light)))
+        Toast.makeText(this, "Đã bắt đầu lại từ bài tập đầu tiên", Toast.LENGTH_SHORT).show()
+    }
+
     private fun startNextStep() {
         if (currentIndex >= workouts.size) {
             showFinishScreen()
             return
         }
+
+        btnAction.visibility = View.GONE
+        btnPause.visibility = View.VISIBLE
+        btnReset.visibility = View.VISIBLE
 
         if (isResting) {
             isResting = false
@@ -162,25 +269,12 @@ class WorkoutSessionActivity : AppCompatActivity() {
         }
     }
 
-    private fun showFinishScreen() {
-        timer?.cancel()
-        layoutSession.visibility = View.GONE
-        layoutFinish.visibility = View.VISIBLE
-        
-        txtTotalExercises.text = workouts.size.toString()
-        
-        val durationMillis = System.currentTimeMillis() - startTimeMillis
-        val minutes = (durationMillis / 1000) / 60
-        val seconds = (durationMillis / 1000) % 60
-        txtTotalTime.text = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
-        
-        NotificationHelper.showNotification(this)
-    }
-
     private fun startTimer(time: Long) {
         timer?.cancel()
+        timeLeftInMillis = time
         timer = object : CountDownTimer(time, 1000) {
             override fun onTick(millisUntilFinished: Long) {
+                timeLeftInMillis = millisUntilFinished
                 val seconds = millisUntilFinished / 1000
                 txtTimer.text = String.format(Locale.getDefault(), "00:%02d", seconds)
             }
@@ -200,6 +294,70 @@ class WorkoutSessionActivity : AppCompatActivity() {
                 }
             }
         }.start()
+    }
+
+    private fun saveSession() {
+        val sp = getSharedPreferences("workout_session", Context.MODE_PRIVATE)
+        sp.edit().apply {
+            putInt("trainer_id", trainerId)
+            putInt("current_index", currentIndex)
+            putBoolean("is_resting", isResting)
+            putBoolean("is_paused", isPaused)
+            putLong("time_left", timeLeftInMillis)
+            putLong("start_time", startTimeMillis)
+            apply()
+        }
+    }
+
+    private fun restoreSession() {
+        val sp = getSharedPreferences("workout_session", Context.MODE_PRIVATE)
+        val savedId = sp.getInt("trainer_id", -1)
+        
+        if (savedId == trainerId) {
+            currentIndex = sp.getInt("current_index", 0)
+            isResting = sp.getBoolean("is_resting", false)
+            isPaused = sp.getBoolean("is_paused", false)
+            timeLeftInMillis = sp.getLong("time_left", 0L)
+            startTimeMillis = sp.getLong("start_time", 0L)
+
+            if (timeLeftInMillis > 0) {
+                txtTimer.text = String.format(Locale.getDefault(), "00:%02d", timeLeftInMillis / 1000)
+                if (isPaused) {
+                    btnPause.visibility = View.VISIBLE
+                    btnReset.visibility = View.VISIBLE
+                    btnPause.text = "▶ TIẾP TỤC"
+                    btnAction.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    private fun clearSession() {
+        val sp = getSharedPreferences("workout_session", Context.MODE_PRIVATE)
+        sp.edit().clear().apply()
+    }
+
+    private fun showFinishScreen() {
+        timer?.cancel()
+        clearSession()
+        layoutSession.visibility = View.GONE
+        layoutFinish.visibility = View.VISIBLE
+        
+        txtTotalExercises.text = workouts.size.toString()
+        
+        val durationMillis = System.currentTimeMillis() - startTimeMillis
+        val minutes = (durationMillis / 1000) / 60
+        val seconds = (durationMillis / 1000) % 60
+        txtTotalTime.text = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+        
+        NotificationHelper.showNotification(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (timer != null && !layoutFinish.isShown) {
+            saveSession()
+        }
     }
 
     override fun onDestroy() {

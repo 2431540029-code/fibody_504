@@ -30,7 +30,7 @@ class ShopActivity : AppCompatActivity() {
     private lateinit var adapter: ProductAdapter
     
     private var currentPage = 1
-    private val pageSize = 6 
+    private val pageSize = 12
     private var totalPages = 1
     private var currentCategory = "Tất cả"
 
@@ -98,6 +98,8 @@ class ShopActivity : AppCompatActivity() {
             intent.putExtra("product_category", product.category)
             intent.putExtra("product_available", product.isAvailable)
             intent.putExtra("product_gift", product.hasGift)
+            intent.putExtra("product_stock", product.stockQuantity)
+            intent.putExtra("product_sold", product.soldQuantity)
             startActivity(intent)
         }
         recyclerProducts.layoutManager = GridLayoutManager(this, 2)
@@ -108,14 +110,14 @@ class ShopActivity : AppCompatActivity() {
         currentPage = page
         val dbHelper = DatabaseHelper(this)
         
-        // 1. Hiển thị dữ liệu từ máy ngay lập tức (Offline First)
-        val localData = dbHelper.getProductsByPage(page, pageSize)
+        // 1. Hiển thị dữ liệu từ máy ngay lập tức với Danh mục đang chọn
+        val localData = dbHelper.getProductsByPage(page, pageSize, currentCategory)
         productList.clear()
         productList.addAll(localData)
         adapter.notifyDataSetChanged()
         
-        // Cập nhật phân trang dựa trên SQLite
-        val totalProducts = dbHelper.getTotalProductCount()
+        // Cập nhật phân trang dựa trên số lượng của chính Danh mục đó
+        val totalProducts = dbHelper.getTotalProductCount(currentCategory)
         totalPages = Math.ceil(totalProducts.toDouble() / pageSize).toInt()
         setupPaginationButtons()
 

@@ -46,28 +46,30 @@ class WorkoutAdapter(
             holder.txtDuration.text = "x${workout.reps_count}"
         }
 
-        // Tự động tìm icon theo tên bài tập (không dấu, thay khoảng trắng bằng gạch dưới)
-        val cleanName = workout.workout_name.lowercase()
-            .replace(" ", "_")
-            .replace("á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ".toRegex(), "a")
-            .replace("é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ".toRegex(), "e")
-            .replace("í|ì|ỉ|ĩ|ị".toRegex(), "i")
-            .replace("ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ".toRegex(), "o")
-            .replace("ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự".toRegex(), "u")
-            .replace("ý|ỳ|ỷ|ỹ|ỵ".toRegex(), "y")
-            .replace("đ".toRegex(), "d")
+        // Logic hiển thị GIF: Kiểm tra xem video_url có phải đường dẫn file hay không
+        val gifPath = workout.video_url
+        if (gifPath.startsWith("/")) {
+            // Tải từ file hệ thống (PT thêm vào)
+            Glide.with(holder.itemView.context).asGif().load(java.io.File(gifPath)).placeholder(R.drawable.ic_launcher_background).into(holder.imgWorkoutThumb)
+        } else {
+            // Tự động tìm icon theo tên bài tập (Dữ liệu mẫu)
+            val cleanName = workout.workout_name.lowercase()
+                .replace(" ", "_")
+                .replace("á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ".toRegex(), "a")
+                .replace("é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ".toRegex(), "e")
+                .replace("í|ì|ỉ|ĩ|ị".toRegex(), "i")
+                .replace("ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ".toRegex(), "o")
+                .replace("ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự".toRegex(), "u")
+                .replace("ý|ỳ|ỷ|ỹ|ỵ".toRegex(), "y")
+                .replace("đ".toRegex(), "d")
 
-        val resId = holder.itemView.context.resources.getIdentifier(
-            cleanName,
-            "raw",
-            holder.itemView.context.packageName
-        )
-        
-        Glide.with(holder.itemView.context)
-            .asGif()
-            .load(if (resId != 0) resId else R.drawable.ic_launcher_background)
-            .placeholder(R.drawable.ic_launcher_background)
-            .into(holder.imgWorkoutThumb)
+            val resId = holder.itemView.context.resources.getIdentifier(cleanName, "raw", holder.itemView.context.packageName)
+            Glide.with(holder.itemView.context)
+                .asGif()
+                .load(if (resId != 0) resId else R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.ic_launcher_background)
+                .into(holder.imgWorkoutThumb)
+        }
 
         // Hiển thị nút video nếu có link
         if (!workout.video_url.isNullOrEmpty() && workout.video_url.startsWith("http")) {

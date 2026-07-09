@@ -19,6 +19,7 @@ import com.example.fitbody.utils.NotificationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.Locale
 
 class WorkoutSessionActivity : AppCompatActivity() {
@@ -141,23 +142,29 @@ class WorkoutSessionActivity : AppCompatActivity() {
         }
         txtWorkoutName.text = targetWorkout.workout_name
 
-        // Load GIF
-        val cleanName = targetWorkout.workout_name.lowercase()
-            .replace(" ", "_")
-            .replace("á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ".toRegex(), "a")
-            .replace("é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ".toRegex(), "e")
-            .replace("í|ì|ỉ|ĩ|ị".toRegex(), "i")
-            .replace("ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ".toRegex(), "o")
-            .replace("ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự".toRegex(), "u")
-            .replace("ý|ỳ|ỷ|ỹ|ỵ".toRegex(), "y")
-            .replace("đ".toRegex(), "d")
+        // Logic tải GIF: Kiểm tra xem video_url có phải đường dẫn file hay không
+        val gifPath = targetWorkout.video_url
+        if (gifPath.startsWith("/")) {
+            // Tải từ file hệ thống (PT thêm vào)
+            Glide.with(this).asGif().load(File(gifPath)).into(imgWorkoutGif)
+        } else {
+            // Tải từ resource raw (Dữ liệu mẫu)
+            val cleanName = targetWorkout.workout_name.lowercase()
+                .replace(" ", "_")
+                .replace("á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ".toRegex(), "a")
+                .replace("é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ".toRegex(), "e")
+                .replace("í|ì|ỉ|ĩ|ị".toRegex(), "i")
+                .replace("ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ".toRegex(), "o")
+                .replace("ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự".toRegex(), "u")
+                .replace("ý|ỳ|ỷ|ỹ|ỵ".toRegex(), "y")
+                .replace("đ".toRegex(), "d")
 
-        val resId = resources.getIdentifier(cleanName, "raw", packageName)
-        
-        Glide.with(this)
-            .asGif()
-            .load(if (resId != 0) resId else R.raw.bat_nhay)
-            .into(imgWorkoutGif)
+            val resId = resources.getIdentifier(cleanName, "raw", packageName)
+            Glide.with(this)
+                .asGif()
+                .load(if (resId != 0) resId else R.raw.bat_nhay)
+                .into(imgWorkoutGif)
+        }
 
         if (isPaused) {
             imgWorkoutGif.alpha = 0.5f

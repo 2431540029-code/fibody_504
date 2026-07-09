@@ -1,12 +1,17 @@
 package com.example.fitbody.ui.pt
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.fitbody.R
 import com.example.fitbody.model.Workout
+import java.io.File
+import java.io.FileOutputStream
 
 class AddWorkoutActivity : AppCompatActivity() {
 
@@ -14,11 +19,19 @@ class AddWorkoutActivity : AppCompatActivity() {
     private lateinit var edtSets: EditText
     private lateinit var edtReps: EditText
     private lateinit var edtMuscle: EditText
-    private lateinit var edtVideo: EditText
+    private lateinit var txtGifPath: TextView
+    private var selectedGifUri: Uri? = null
+    private var internalGifPath: String? = null
+
+    private val pickGif = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            selectedGifUri = uri
+            txtGifPath.text = "Đã chọn: " + getFileName(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_add_workout)
 
         val trainerId = intent.getIntExtra("trainer_id", 0)
@@ -27,44 +40,17 @@ class AddWorkoutActivity : AppCompatActivity() {
         edtSets = findViewById(R.id.edtSets)
         edtReps = findViewById(R.id.edtReps)
         edtMuscle = findViewById(R.id.edtMuscle)
-        edtVideo = findViewById(R.id.edtVideo)
+        txtGifPath = findViewById(R.id.txtGifPath)
 
-        // Restore state if available (Chapter 4.3 - Handling Activity Re-creation)
-        savedInstanceState?.let {
-            edtName.setText(it.getString("saved_name"))
-            edtMuscle.setText(it.getString("saved_muscle"))
-            edtVideo.setText(it.getString("saved_video"))
+        findViewById<LinearLayout>(R.id.btnSelectGif).setOnClickListener {
+            pickGif.launch("image/gif")
         }
 
         val btnSave = findViewById<Button>(R.id.btnSave)
-
         btnSave.setOnClickListener {
-            if (edtName.text.isEmpty() || edtSets.text.isEmpty() || edtReps.text.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val workout = Workout(
-                id = 0,
-                trainer_id = trainerId,
-                workout_name = edtName.text.toString(),
-                sets_count = edtSets.text.toString(),
-                reps_count = edtReps.text.toString(),
-                muscle_group = edtMuscle.text.toString(),
-                video_url = edtVideo.text.toString()
-            )
-
-            val success = com.example.fitbody.database.DatabaseHelper(this).addWorkout(workout)
-
-            if (success) {
-                Toast.makeText(this, "Thêm thành công", Toast.LENGTH_SHORT).show()
-                finish()
-            } else {
-                Toast.makeText(this, "Thêm thất bại", Toast.LENGTH_SHORT).show()
-            }
+            saveWorkout(trainerId)
         }
 
-        // Handle Back button with confirmation (Chapter 4.1 - Events)
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (edtName.text.isNotEmpty() || edtSets.text.isNotEmpty()) {
@@ -76,6 +62,61 @@ class AddWorkoutActivity : AppCompatActivity() {
         })
     }
 
+    private fun saveWorkout(trainerId: Int) {
+        val name = edtName.text.toString().trim()
+        val sets = edtSets.text.toString().trim()
+        val reps = edtReps.text.toString().trim()
+        val muscle = edtMuscle.text.toString().trim()
+
+        if (name.isEmpty() || sets.isEmpty() || reps.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Copy GIF to internal storage if selected
+        selectedGifUri?.let { uri ->
+            internalGifPath = saveGifToInternalStorage(uri)
+        }
+
+        val workout = Workout(
+            id = 0,
+            trainer_id = trainerId,
+            workout_name = name,
+            sets_count = sets,
+            reps_count = reps,
+            muscle_group = muscle,
+            video_url = internalGifPath ?: "" // Store the file path in video_url column
+        )
+
+        val success = com.example.fitbody.database.DatabaseHelper(this).addWorkout(workout)
+        if (success) {
+            Toast.makeText(this, "Thêm bài tập thành công", Toast.LENGTH_SHORT).show()
+            finish()
+        } else {
+            Toast.makeText(this, "Lỗi khi lưu bài tập", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun saveGifToInternalStorage(uri: Uri): String? {
+        return try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val fileName = "workout_" + System.currentTimeMillis() + ".gif"
+            val file = File(filesDir, fileName)
+            val outputStream = FileOutputStream(file)
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+            file.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun getFileName(uri: Uri): String {
+        return uri.path?.substringAfterLast('/') ?: "file_gif"
+    }
+
     private fun showExitConfirmation() {
         AlertDialog.Builder(this)
             .setTitle("Hủy bỏ thay đổi")
@@ -83,13 +124,5 @@ class AddWorkoutActivity : AppCompatActivity() {
             .setPositiveButton("Thoát") { _, _ -> finish() }
             .setNegativeButton("Ở lại", null)
             .show()
-    }
-
-    // Save state before Activity is killed (Chapter 4.3)
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("saved_name", edtName.text.toString())
-        outState.putString("saved_muscle", edtMuscle.text.toString())
-        outState.putString("saved_video", edtVideo.text.toString())
     }
 }

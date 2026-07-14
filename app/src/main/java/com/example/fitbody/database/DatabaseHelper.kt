@@ -433,13 +433,13 @@ class DatabaseHelper(context: Context) :
             if (orderId == -1L) return -1L
 
             for (item in items) {
-                db.insert(TABLE_ORDER_ITEMS, null, ContentValues().apply { put("order_id", orderId); put("product_id", item.product_id); put("quantity", item.quantity); put("price", item.price) })
+                db.insert(TABLE_ORDER_ITEMS, null, ContentValues().apply { put("order_id", orderId); put("product_id", item.productId); put("quantity", item.quantity); put("price", item.price) })
                 
                 // Trừ tồn kho và tăng số lượng đã bán
                 db.execSQL("UPDATE $TABLE_PRODUCTS SET stock_quantity = MAX(0, stock_quantity - ?), sold_quantity = sold_quantity + ? WHERE id = ?", 
-                    arrayOf(item.quantity, item.quantity, item.product_id))
+                    arrayOf(item.quantity, item.quantity, item.productId))
 
-                db.delete(TABLE_CART, "product_id = ? AND user_id = ?", arrayOf(item.product_id.toString(), userId.toString()))
+                db.delete(TABLE_CART, "product_id = ? AND user_id = ?", arrayOf(item.productId.toString(), userId.toString()))
             }
             db.setTransactionSuccessful(); return orderId
         } catch (e: Exception) { return -1L } finally { db.endTransaction() }
@@ -452,7 +452,7 @@ class DatabaseHelper(context: Context) :
             val items = getOrderItems(id)
             for (item in items) {
                 db.execSQL("UPDATE $TABLE_PRODUCTS SET stock_quantity = stock_quantity + ?, sold_quantity = MAX(0, sold_quantity - ?) WHERE id = ?",
-                    arrayOf(item.quantity, item.quantity, item.product_id))
+                    arrayOf(item.quantity, item.quantity, item.productId))
             }
         }
         return db.update(TABLE_ORDERS, ContentValues().apply { put("status", status); if (refundReason != null) put("refund_reason", refundReason) }, "id = ?", arrayOf(id.toString())) > 0
@@ -486,6 +486,13 @@ class DatabaseHelper(context: Context) :
         db.execSQL("DELETE FROM $TABLE_CHECKIN")
         db.execSQL("DELETE FROM $TABLE_PROGRESS")
         db.execSQL("DELETE FROM $TABLE_SCHEDULE")
+    }
+
+    fun getOrderById(id: Int): com.example.fitbody.model.Order? {
+        val c = readableDatabase.rawQuery("SELECT * FROM $TABLE_ORDERS WHERE id = ?", arrayOf(id.toString()))
+        var o: com.example.fitbody.model.Order? = null
+        if (c.moveToFirst()) o = com.example.fitbody.model.Order(c.getInt(0), c.getInt(1), c.getInt(2), c.getString(3), c.getString(4), c.getString(5), c.getString(6), c.getString(7), c.getString(8), c.getString(9), c.getString(10), getOrderItems(id))
+        c.close(); return o
     }
 
     fun getOrderHistory(userId: Int): List<com.example.fitbody.model.Order> {

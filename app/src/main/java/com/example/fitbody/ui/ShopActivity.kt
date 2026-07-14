@@ -126,8 +126,14 @@ class ShopActivity : AppCompatActivity() {
         apiService.getProductsFromServer().enqueue(object : Callback<List<Product>> {
             override fun onResponse(call: Call<List<Product>>, response: Response<List<Product>>) {
                 if (response.isSuccessful && response.body() != null) {
-                    // Nếu có dữ liệu mới từ Server, bạn có thể cập nhật lại UI tại đây
-                    // Toast.makeText(this@ShopActivity, "Dữ liệu đã đồng bộ với Server", Toast.LENGTH_SHORT).show()
+                    val serverProducts = response.body()!!
+                    dbHelper.syncProductsFromServer(serverProducts)
+                    
+                    // Cập nhật lại UI trang hiện tại để thấy thay đổi (nếu có)
+                    val updatedLocal = dbHelper.getProductsByPage(page, pageSize, currentCategory)
+                    productList.clear()
+                    productList.addAll(updatedLocal)
+                    adapter.notifyDataSetChanged()
                 }
             }
             override fun onFailure(call: Call<List<Product>>, t: Throwable) {

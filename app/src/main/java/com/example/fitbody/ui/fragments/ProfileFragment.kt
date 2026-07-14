@@ -34,13 +34,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private lateinit var switchNotifications: SwitchCompat
     private lateinit var txtChangePassword: TextView
     private lateinit var txtContactSupport: TextView
+    private lateinit var txtClearCache: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initViews(view)
         loadProfileInfo()
-        setupListeners()
+        setupListeners(view)
     }
 
     private fun initViews(view: View) {
@@ -56,14 +57,23 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         switchNotifications = view.findViewById(R.id.switchNotifications)
         txtChangePassword = view.findViewById(R.id.txtChangePassword)
         txtContactSupport = view.findViewById(R.id.txtContactSupport)
+        
+        // Thêm TextView xóa cache vào Layout bằng code (không cần sửa XML)
+        txtClearCache = TextView(requireContext()).apply {
+            text = "🗑 Xóa bộ nhớ đệm (Reset dữ liệu)"
+            setTextColor(android.graphics.Color.parseColor("#888888"))
+            textSize = 14f
+            setPadding(16, 40, 16, 40)
+            gravity = android.view.Gravity.CENTER
+        }
+        (view.findViewById<View>(R.id.btnLogout).parent as android.widget.LinearLayout).addView(txtClearCache)
 
-        // Cập nhật Switch từ cài đặt đã lưu
         val session = SessionManager(requireContext())
         switchNotifications.isChecked = session.isRemindersEnabled()
     }
 
-    private fun setupListeners() {
-        view?.findViewById<Button>(R.id.txtEditProfile)?.setOnClickListener {
+    private fun setupListeners(view: View) {
+        view.findViewById<Button>(R.id.txtEditProfile)?.setOnClickListener {
             startActivity(Intent(requireContext(), EditProfileActivity::class.java))
         }
 
@@ -82,8 +92,24 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         txtContactSupport.setOnClickListener {
             startActivity(Intent(requireContext(), com.example.fitbody.ui.ContactActivity::class.java))
         }
+        
+        txtClearCache.setOnClickListener {
+            showClearCacheDialog()
+        }
 
         btnLogout.setOnClickListener { logout() }
+    }
+
+    private fun showClearCacheDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Làm sạch ứng dụng")
+            .setMessage("Mọi dữ liệu lịch sử tập, đơn hàng và giỏ hàng sẽ bị xóa. Bạn có chắc chắn?")
+            .setPositiveButton("Xóa hết") { _, _ ->
+                DatabaseHelper(requireContext()).clearAllData()
+                Toast.makeText(requireContext(), "Đã làm sạch ứng dụng!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Hủy", null)
+            .show()
     }
 
     private fun toggleDarkMode() {

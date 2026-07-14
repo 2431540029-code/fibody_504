@@ -445,13 +445,47 @@ class DatabaseHelper(context: Context) :
         } catch (e: Exception) { return -1L } finally { db.endTransaction() }
     }
 
-    fun updateOrderStatus(id: Int, status: String, refundReason: String? = null): Boolean = writableDatabase.update(TABLE_ORDERS, ContentValues().apply { put("status", status); if (refundReason != null) put("refund_reason", refundReason) }, "id = ?", arrayOf(id.toString())) > 0
+    fun updateOrderStatus(id: Int, status: String, refundReason: String? = null): Boolean {
+        val db = writableDatabase
+        // Nếu hủy đơn hoặc hoàn tiền, trả lại số lượng vào kho
+        if (status == "Đã hủy" || status == "Yêu cầu hoàn tiền") {
+            val items = getOrderItems(id)
+            for (item in items) {
+                db.execSQL("UPDATE $TABLE_PRODUCTS SET stock_quantity = stock_quantity + ?, sold_quantity = MAX(0, sold_quantity - ?) WHERE id = ?",
+                    arrayOf(item.quantity, item.quantity, item.product_id))
+            }
+        }
+        return db.update(TABLE_ORDERS, ContentValues().apply { put("status", status); if (refundReason != null) put("refund_reason", refundReason) }, "id = ?", arrayOf(id.toString())) > 0
+    }
 
-    fun getOrderById(id: Int): com.example.fitbody.model.Order? {
-        val c = readableDatabase.rawQuery("SELECT * FROM $TABLE_ORDERS WHERE id = ?", arrayOf(id.toString()))
-        var o: com.example.fitbody.model.Order? = null
-        if (c.moveToFirst()) o = com.example.fitbody.model.Order(c.getInt(0), c.getInt(1), c.getInt(2), c.getString(3), c.getString(4), c.getString(5), c.getString(6), c.getString(7), c.getString(8), c.getString(9), c.getString(10), getOrderItems(id))
-        c.close(); return o
+    fun syncProductsFromServer(products: List<Product>) {
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            for (p in products) {
+                val v = ContentValues().apply {
+                    put("name", p.name)
+                    put("price", p.price)
+                    put("original_price", p.originalPrice)
+                    put("image", p.image)
+                    put("description", p.description)
+                    put("category", p.category)
+                    // Không ghi đè stock_quantity để giữ logic kho thật
+                }
+                db.update(TABLE_PRODUCTS, v, "id = ?", arrayOf(p.id.toString()))
+            }
+            db.setTransactionSuccessful()
+        } finally { db.endTransaction() }
+    }
+
+    fun clearAllData() {
+        val db = writableDatabase
+        db.execSQL("DELETE FROM $TABLE_CART")
+        db.execSQL("DELETE FROM $TABLE_ORDERS")
+        db.execSQL("DELETE FROM $TABLE_ORDER_ITEMS")
+        db.execSQL("DELETE FROM $TABLE_CHECKIN")
+        db.execSQL("DELETE FROM $TABLE_PROGRESS")
+        db.execSQL("DELETE FROM $TABLE_SCHEDULE")
     }
 
     fun getOrderHistory(userId: Int): List<com.example.fitbody.model.Order> {

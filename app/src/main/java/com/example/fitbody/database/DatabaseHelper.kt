@@ -17,7 +17,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "fitbody.db"
-        private const val DATABASE_VERSION = 19
+        private const val DATABASE_VERSION = 20
 
         const val TABLE_USERS = "tbl_users"
         const val TABLE_TRAINERS = "tbl_trainers"
@@ -33,6 +33,9 @@ class DatabaseHelper(context: Context) :
         const val TABLE_ENROLLMENTS = "tbl_enrollments"
         const val TABLE_ORDERS = "tbl_orders"
         const val TABLE_ORDER_ITEMS = "tbl_order_items"
+        const val TABLE_POSTS = "tbl_posts"
+        const val TABLE_POST_LIKES = "tbl_post_likes"
+        const val TABLE_COMMENTS = "tbl_comments"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -50,6 +53,9 @@ class DatabaseHelper(context: Context) :
         db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_LIKES (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, trainer_id INTEGER, UNIQUE(user_id, trainer_id))")
         db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_REVIEWS (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, trainer_id INTEGER, rating INTEGER, comment TEXT, date TEXT, FOREIGN KEY(user_id) REFERENCES $TABLE_USERS(id), FOREIGN KEY(trainer_id) REFERENCES $TABLE_TRAINERS(id))")
         db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_ENROLLMENTS (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, trainer_id INTEGER, enroll_date TEXT, status TEXT DEFAULT 'active', UNIQUE(user_id, trainer_id), FOREIGN KEY(user_id) REFERENCES $TABLE_USERS(id), FOREIGN KEY(trainer_id) REFERENCES $TABLE_TRAINERS(id))")
+        db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_POSTS (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, content TEXT, image TEXT, post_date TEXT, FOREIGN KEY(user_id) REFERENCES $TABLE_USERS(id))")
+        db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_POST_LIKES (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, user_id INTEGER, UNIQUE(post_id, user_id))")
+        db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_COMMENTS (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, user_id INTEGER, comment_text TEXT, comment_date TEXT)")
 
         db.beginTransaction()
         try {
@@ -110,6 +116,11 @@ class DatabaseHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        if (oldVersion < 20) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_POSTS (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, content TEXT, image TEXT, post_date TEXT, FOREIGN KEY(user_id) REFERENCES $TABLE_USERS(id))")
+            db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_POST_LIKES (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, user_id INTEGER, UNIQUE(post_id, user_id))")
+            db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_COMMENTS (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, user_id INTEGER, comment_text TEXT, comment_date TEXT)")
+        }
         if (oldVersion < 19) {
             db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
             db.execSQL("DROP TABLE IF EXISTS $TABLE_TRAINERS")
@@ -162,14 +173,65 @@ class DatabaseHelper(context: Context) :
 
     private fun seedWorkouts(db: SQLiteDatabase) {
         val workouts = arrayOf(
+            // HLV AN (ID: 1)
             "(100, 1, 'Bật nhảy', '30 giây', '0', 'Khởi động', '')",
             "(101, 1, 'Chống đẩy cao tay', '16 lần', '16', 'Ngực', '')",
             "(102, 1, 'Chống đẩy bằng đầu gối', '12 lần', '12', 'Ngực', '')",
             "(103, 1, 'Chống đẩy', '10 lần', '10', 'Ngực', '')",
             "(104, 1, 'Bench Press', '4 hiệp', '12', 'Ngực', 'https://youtu.be/rT7DgCr-3pg')",
+            
+            // HLV Quỳnh Anh (ID: 2)
             "(201, 2, 'Squat', '4 hiệp', '15', 'Mông - Đùi', 'https://youtu.be/aclHkVaku9U')",
             "(202, 2, 'Chùng chân', '3 hiệp', '12', 'Đùi sau', 'https://www.youtube.com/watch?v=QOVaHwm-Q6U')",
-            "(205, 2, 'Plank bụng', '60 giây', '0', 'Bụng', 'https://www.youtube.com/watch?v=pSHjTRCQxIw')"
+            "(205, 2, 'Plank bụng', '60 giây', '0', 'Bụng', 'https://www.youtube.com/watch?v=pSHjTRCQxIw')",
+
+            // HLV Tiến (ID: 16)
+            "(301, 16, 'Deadlift', '4 hiệp', '8', 'Full Body', 'https://youtu.be/op9kVnSso6Q')",
+            "(302, 16, 'Pull up', '3 hiệp', '10', 'Lưng', '')",
+
+            // HLV Trí (ID: 17)
+            "(401, 17, 'Muscle up', '3 hiệp', '5', 'Lưng - Bụng', '')",
+            "(402, 17, 'L-Sit', '30 giây', '0', 'Bụng', '')",
+
+            // HLV Nhi (ID: 18)
+            "(501, 18, 'Chào mặt trời', '5 vòng', '0', 'Toàn thân', '')",
+            "(502, 18, 'Tư thế chiến binh', '10 lần', '0', 'Toàn thân', '')",
+
+            // HLV Tony (ID: 19)
+            "(601, 19, 'Burpees', '4 hiệp', '15', 'Toàn thân', '')",
+            "(602, 19, 'Mountain Climber', '45 giây', '0', 'Toàn thân', '')",
+
+            // HLV Jenny (ID: 20)
+            "(701, 20, 'Bicycle Crunch', '3 hiệp', '20', 'Bụng - Eo', '')",
+            "(702, 20, 'Leg Raise', '3 hiệp', '15', 'Bụng - Eo', '')",
+
+            // HLV Minh Anh (ID: 21)
+            "(801, 21, 'Chạy tại chỗ', '2 phút', '0', 'Tim mạch', '')",
+            "(802, 21, 'Jumping Jack', '50 lần', '0', 'Tim mạch', '')",
+
+            // HLV Bảo Ngọc (ID: 22)
+            "(901, 22, 'Lunges', '3 hiệp', '12', 'Toàn thân', '')",
+            "(902, 22, 'Glute Bridge', '3 hiệp', '20', 'Toàn thân', '')",
+
+            // HLV Hoàng Nam (ID: 23)
+            "(1001, 23, 'Incline Bench Press', '4 hiệp', '10', 'Ngực', '')",
+            "(1002, 23, 'Lateral Raise', '3 hiệp', '15', 'Vai', '')",
+
+            // HLV Quốc Huy (ID: 24)
+            "(1101, 24, 'Jab-Cross', '3 phút', '0', 'Combat', '')",
+            "(1102, 24, 'Hook-Upper', '3 phút', '0', 'Combat', '')",
+
+            // HLV Kim Chi (ID: 25)
+            "(1201, 25, 'Căng cơ cổ', '1 phút', '0', 'Giãn cơ', '')",
+            "(1202, 25, 'Căng cơ lưng', '1 phút', '0', 'Giãn cơ', '')",
+
+            // HLV Tuấn Kiệt (ID: 26)
+            "(1301, 26, 'Dips xà đơn', '4 hiệp', '12', 'Toàn thân', '')",
+            "(1302, 26, 'Chin up', '4 hiệp', '10', 'Toàn thân', '')",
+
+            // HLV Lan Hương (ID: 27)
+            "(1401, 27, 'Xoay khớp', '3 phút', '0', 'Toàn thân', '')",
+            "(1402, 27, 'Lắc hông', '2 phút', '0', 'Toàn thân', '')"
         )
         for (w in workouts) {
             db.execSQL("INSERT OR IGNORE INTO $TABLE_WORKOUTS (id, trainer_id, workout_name, sets_count, reps_count, muscle_group, video_url) VALUES $w")
@@ -609,6 +671,25 @@ class DatabaseHelper(context: Context) :
         val c = readableDatabase.rawQuery("SELECT id FROM $TABLE_USERS WHERE social_id = ? AND provider = ?", arrayOf(id, p))
         var res = -1; if (c.moveToFirst()) res = c.getInt(0); c.close(); return res
     }
+
+    fun getUserById(id: Int): com.example.fitbody.model.User? {
+        val cursor = readableDatabase.rawQuery("SELECT * FROM $TABLE_USERS WHERE id = ?", arrayOf(id.toString()))
+        return if (cursor.moveToFirst()) {
+            val user = com.example.fitbody.model.User(
+                cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                cursor.getString(cursor.getColumnIndexOrThrow("username")),
+                cursor.getString(cursor.getColumnIndexOrThrow("email")),
+                cursor.getString(cursor.getColumnIndexOrThrow("password")),
+                cursor.getString(cursor.getColumnIndexOrThrow("role")),
+                cursor.getString(cursor.getColumnIndexOrThrow("avatar"))
+            )
+            cursor.close()
+            user
+        } else {
+            cursor.close()
+            null
+        }
+    }
     fun registerSocialUser(u: String, e: String, sid: String, p: String): Long = writableDatabase.insert(TABLE_USERS, null, ContentValues().apply { put("username", u); put("email", e); put("social_id", sid); put("provider", p); put("role", "user") })
 
     fun searchTrainers(query: String, userId: Int): List<com.example.fitbody.model.Trainer> {
@@ -617,5 +698,71 @@ class DatabaseHelper(context: Context) :
         val p = "%${query.trim()}%"; val cursor = readableDatabase.rawQuery(sql, arrayOf(userId.toString(), p, p, p, p, p))
         if (cursor.moveToFirst()) { do { list.add(cursorToTrainer(cursor)) } while (cursor.moveToNext()) }
         cursor.close(); return list
+    }
+
+    // --- SOCIAL MEDIA FUNCTIONS ---
+    fun addPost(userId: Int, content: String, image: String?): Long {
+        val date = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+        val v = ContentValues().apply { put("user_id", userId); put("content", content); put("image", image); put("post_date", date) }
+        return writableDatabase.insert(TABLE_POSTS, null, v)
+    }
+
+    fun getAllPosts(currentUserId: Int): List<com.example.fitbody.model.Post> {
+        val list = mutableListOf<com.example.fitbody.model.Post>()
+        val sql = "SELECT p.*, u.username, u.avatar, (SELECT COUNT(*) FROM $TABLE_POST_LIKES WHERE post_id = p.id) as likes, (SELECT 1 FROM $TABLE_POST_LIKES WHERE post_id = p.id AND user_id = ?) as is_liked FROM $TABLE_POSTS p JOIN $TABLE_USERS u ON p.user_id = u.id ORDER BY p.id DESC"
+        val c = readableDatabase.rawQuery(sql, arrayOf(currentUserId.toString()))
+        if (c.moveToFirst()) {
+            do {
+                val id = c.getInt(0)
+                val userId = c.getInt(1)
+                val content = c.getString(2) ?: ""
+                val image = c.getString(3)
+                val date = c.getString(4) ?: ""
+                val username = c.getString(6) ?: "User"
+                val avatar = c.getString(7)
+                val likes = c.getInt(8)
+                val isLiked = c.getInt(9) == 1
+                
+                list.add(com.example.fitbody.model.Post(id, userId, username, avatar, content, image, date, likes, isLiked))
+            } while (c.moveToNext())
+        }
+        c.close(); return list
+    }
+
+    fun togglePostLike(userId: Int, postId: Int): Boolean {
+        val db = writableDatabase
+        val c = db.rawQuery("SELECT id FROM $TABLE_POST_LIKES WHERE post_id = ? AND user_id = ?", arrayOf(postId.toString(), userId.toString()))
+        val exists = c.moveToFirst()
+        c.close()
+        return if (exists) {
+            db.delete(TABLE_POST_LIKES, "post_id = ? AND user_id = ?", arrayOf(postId.toString(), userId.toString())) > 0
+        } else {
+            db.insert(TABLE_POST_LIKES, null, ContentValues().apply { put("post_id", postId); put("user_id", userId) }) != -1L
+        }
+    }
+
+    fun addComment(userId: Int, postId: Int, text: String): Boolean {
+        val date = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+        val v = ContentValues().apply { put("post_id", postId); put("user_id", userId); put("comment_text", text); put("comment_date", date) }
+        return writableDatabase.insert(TABLE_COMMENTS, null, v) != -1L
+    }
+
+    fun getCommentsForPost(postId: Int): List<com.example.fitbody.model.Comment> {
+        val list = mutableListOf<com.example.fitbody.model.Comment>()
+        val sql = "SELECT c.*, u.username, u.avatar FROM $TABLE_COMMENTS c JOIN $TABLE_USERS u ON c.user_id = u.id WHERE c.post_id = ? ORDER BY c.id ASC"
+        val c = readableDatabase.rawQuery(sql, arrayOf(postId.toString()))
+        if (c.moveToFirst()) {
+            do {
+                val id = c.getInt(0)
+                val pId = c.getInt(1)
+                val uId = c.getInt(2)
+                val text = c.getString(3) ?: ""
+                val date = c.getString(4) ?: ""
+                val username = c.getString(5) ?: "User"
+                val avatar = c.getString(6)
+                list.add(com.example.fitbody.model.Comment(id, pId, uId, username, avatar, text, date))
+            } while (c.moveToNext())
+        }
+        c.close(); return list
     }
 }

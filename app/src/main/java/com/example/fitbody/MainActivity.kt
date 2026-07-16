@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.fitbody.ui.fragments.FavoriteFragment
+import com.example.fitbody.ui.fragments.CommunityFragment
 import com.example.fitbody.ui.fragments.HomeFragment
 import com.example.fitbody.ui.fragments.ProfileFragment
 import com.example.fitbody.utils.ScheduleNotification
@@ -47,6 +48,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_favorite -> {
                     replaceFragment(FavoriteFragment())
+                    true
+                }
+                R.id.nav_community -> {
+                    replaceFragment(CommunityFragment())
                     true
                 }
                 R.id.nav_profile -> {

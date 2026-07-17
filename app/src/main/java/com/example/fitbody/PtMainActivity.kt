@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import com.example.fitbody.ui.fragments.CommunityFragment
 import com.example.fitbody.ui.fragments.PTHomeFragment
 import com.example.fitbody.ui.fragments.PTProfileFragment
 import com.example.fitbody.ui.fragments.PTStudentsFragment
@@ -39,6 +40,10 @@ class PtMainActivity : AppCompatActivity() {
                 }
                 R.id.nav_pt_workouts -> {
                     replaceFragment(PTWorkoutsFragment())
+                    true
+                }
+                R.id.nav_pt_community -> {
+                    replaceFragment(CommunityFragment())
                     true
                 }
                 R.id.nav_pt_students -> {

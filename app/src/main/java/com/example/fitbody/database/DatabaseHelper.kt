@@ -384,6 +384,11 @@ class DatabaseHelper(context: Context) :
         return writableDatabase.update(TABLE_USERS, v, "id = ?", arrayOf(userId.toString())) > 0
     }
 
+    fun updateUserAvatar(userId: Int, avatar: String): Boolean {
+        val v = ContentValues().apply { put("avatar", avatar) }
+        return writableDatabase.update(TABLE_USERS, v, "id = ?", arrayOf(userId.toString())) > 0
+    }
+
     fun getProductsByPage(page: Int, pageSize: Int, category: String = "Tất cả"): List<Product> {
         val list = mutableListOf<Product>()
         val offset = (page - 1) * pageSize

@@ -1,7 +1,12 @@
 package com.example.fitbody.ui.fragments
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +17,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +30,8 @@ import com.example.fitbody.database.DatabaseHelper
 import com.example.fitbody.utils.SessionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import java.io.File
+import java.io.FileOutputStream
 
 class CommunityFragment : Fragment() {
 
@@ -35,13 +44,34 @@ class CommunityFragment : Fragment() {
 
     private var selectedImagePath: String? = null
 
-    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    // Picker for post images
+    private val pickPostImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            onImageSelected?.invoke(it)
+            onPostImageSelected?.invoke(it)
         }
     }
-    
-    private var onImageSelected: ((Uri) -> Unit)? = null
+    private var onPostImageSelected: ((Uri) -> Unit)? = null
+
+    // Picker for Profile Avatar
+    private val pickAvatar = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            saveAvatarToStorage(it)
+        }
+    }
+
+    private val takeAvatarPhoto = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            val bitmap = result.data?.extras?.get("data") as? Bitmap
+            bitmap?.let {
+                saveAvatarBitmapToStorage(it)
+            }
+        }
+    }
+
+    private val requestCameraPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) openCamera()
+        else Toast.makeText(requireContext(), "Cần quyền camera để chụp ảnh", Toast.LENGTH_SHORT).show()
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_community, container, false)
@@ -53,11 +83,7 @@ class CommunityFragment : Fragment() {
         btnOpenCreatePost = view.findViewById(R.id.btnOpenCreatePost)
         imgCurrentUserAvatar = view.findViewById(R.id.imgCurrentUserAvatar)
 
-        val user = db.getUserById(session.getUserId())
-        user?.avatar?.let { avatar ->
-            val resId = resources.getIdentifier(avatar, "drawable", requireContext().packageName)
-            if (resId != 0) imgCurrentUserAvatar.setImageResource(resId)
-        }
+        loadUserAvatar()
         
         setupRecyclerView()
         loadPosts()
@@ -65,7 +91,76 @@ class CommunityFragment : Fragment() {
         btnOpenCreatePost.setOnClickListener { showAddPostDialog() }
         view.findViewById<View>(R.id.btnPostPhoto).setOnClickListener { showAddPostDialog() }
         
+        // Cập nhật ảnh đại diện khi nhấn vào avatar
+        imgCurrentUserAvatar.setOnClickListener { showChangeAvatarDialog() }
+        
         return view
+    }
+
+    private fun loadUserAvatar() {
+        val user = db.getUserById(session.getUserId())
+        if (user?.avatar.isNullOrEmpty()) {
+            imgCurrentUserAvatar.setImageResource(android.R.drawable.ic_menu_gallery) // Placeholder "trống"
+        } else {
+            val avatar = user!!.avatar!!
+            val resId = resources.getIdentifier(avatar, "drawable", requireContext().packageName)
+            if (resId != 0) {
+                imgCurrentUserAvatar.setImageResource(resId)
+            } else {
+                Glide.with(this).load(File(avatar)).into(imgCurrentUserAvatar)
+            }
+        }
+    }
+
+    private fun showChangeAvatarDialog() {
+        val options = arrayOf("Chọn từ thư viện", "Chụp ảnh mới")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Thay đổi ảnh đại diện")
+            .setItems(options) { _, which ->
+                if (which == 0) pickAvatar.launch("image/*")
+                else checkCameraPermission()
+            }
+            .show()
+    }
+
+    private fun checkCameraPermission() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            openCamera()
+        } else {
+            requestCameraPermission.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    private fun openCamera() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        takeAvatarPhoto.launch(intent)
+    }
+
+    private fun saveAvatarToStorage(uri: Uri) {
+        try {
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            val file = File(requireContext().filesDir, "avatar_${session.getUserId()}_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
+            inputStream?.copyTo(outputStream)
+            val path = file.absolutePath
+            if (db.updateUserAvatar(session.getUserId(), path)) {
+                loadUserAvatar()
+                loadPosts() // Reload to update avatar in posts if any
+            }
+        } catch (e: Exception) {}
+    }
+
+    private fun saveAvatarBitmapToStorage(bitmap: Bitmap) {
+        try {
+            val file = File(requireContext().filesDir, "avatar_${session.getUserId()}_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+            val path = file.absolutePath
+            if (db.updateUserAvatar(session.getUserId(), path)) {
+                loadUserAvatar()
+                loadPosts()
+            }
+        } catch (e: Exception) {}
     }
 
     private fun setupRecyclerView() {
@@ -110,22 +205,25 @@ class CommunityFragment : Fragment() {
         val user = db.getUserById(session.getUserId())
         user?.let {
             txtName.text = it.username
-            it.avatar?.let { avatar ->
-                val resId = resources.getIdentifier(avatar, "drawable", requireContext().packageName)
+            if (it.avatar.isNullOrEmpty()) {
+                imgUser.setImageResource(android.R.drawable.ic_menu_gallery)
+            } else {
+                val resId = resources.getIdentifier(it.avatar, "drawable", requireContext().packageName)
                 if (resId != 0) imgUser.setImageResource(resId)
+                else Glide.with(this).load(File(it.avatar)).into(imgUser)
             }
         }
 
         btnClose.setOnClickListener { bottomSheet.dismiss() }
 
-        onImageSelected = { uri ->
+        onPostImageSelected = { uri ->
             selectedImagePath = uri.toString()
             layoutMediaPreview.visibility = View.VISIBLE
             btnAddPhoto.visibility = View.GONE
             Glide.with(this).load(uri).into(imgPreview)
         }
 
-        btnAddPhoto.setOnClickListener { pickImage.launch("image/*") }
+        btnAddPhoto.setOnClickListener { pickPostImage.launch("image/*") }
 
         btnRemoveMedia.setOnClickListener {
             selectedImagePath = null

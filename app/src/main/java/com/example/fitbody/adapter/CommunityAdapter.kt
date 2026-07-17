@@ -57,7 +57,13 @@ class CommunityAdapter(
 
         if (!post.userAvatar.isNullOrEmpty()) {
             val resId = holder.itemView.context.resources.getIdentifier(post.userAvatar, "drawable", holder.itemView.context.packageName)
-            Glide.with(holder.itemView.context).load(if (resId != 0) resId else post.userAvatar).into(holder.imgAvatar)
+            if (resId != 0) {
+                Glide.with(holder.itemView.context).load(resId).into(holder.imgAvatar)
+            } else {
+                Glide.with(holder.itemView.context).load(java.io.File(post.userAvatar)).into(holder.imgAvatar)
+            }
+        } else {
+            holder.imgAvatar.setImageResource(android.R.drawable.ic_menu_gallery)
         }
 
         if (!post.image.isNullOrEmpty()) {

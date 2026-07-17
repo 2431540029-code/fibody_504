@@ -723,10 +723,10 @@ class DatabaseHelper(context: Context) :
                 val content = c.getString(2) ?: ""
                 val image = c.getString(3)
                 val date = c.getString(4) ?: ""
-                val username = c.getString(6) ?: "User"
-                val avatar = c.getString(7)
-                val likes = c.getInt(8)
-                val isLiked = c.getInt(9) == 1
+                val username = c.getString(5) ?: "User"
+                val avatar = c.getString(6)
+                val likes = c.getInt(7)
+                val isLiked = c.getInt(8) == 1
                 
                 list.add(com.example.fitbody.model.Post(id, userId, username, avatar, content, image, date, likes, isLiked))
             } while (c.moveToNext())

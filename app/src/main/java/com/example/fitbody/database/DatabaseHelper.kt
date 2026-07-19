@@ -667,9 +667,35 @@ class DatabaseHelper(context: Context) :
 
     fun getStudentsForTrainer(trainerId: Int): List<com.example.fitbody.model.User> {
         val list = mutableListOf<com.example.fitbody.model.User>()
-        val cursor = readableDatabase.rawQuery("SELECT u.* FROM $TABLE_USERS u JOIN $TABLE_ENROLLMENTS e ON u.id = e.user_id WHERE e.trainer_id = ?", arrayOf(trainerId.toString()))
-        if (cursor.moveToFirst()) { do { list.add(com.example.fitbody.model.User(cursor.getInt(cursor.getColumnIndexOrThrow("id")), cursor.getString(cursor.getColumnIndexOrThrow("username")), cursor.getString(cursor.getColumnIndexOrThrow("email")), "", cursor.getString(cursor.getColumnIndexOrThrow("role")))) } while (cursor.moveToNext()) }
-        cursor.close(); return list
+        val query = """
+            
+            
+            SELECT DISTINCT u.* FROM $TABLE_USERS u 
+            WHERE u.id IN (
+                SELECT user_id FROM $TABLE_FAVORITES WHERE trainer_id = ?
+                UNION
+                SELECT user_id FROM $TABLE_REVIEWS WHERE trainer_id = ?
+                UNION
+                SELECT user_id FROM $TABLE_LIKES WHERE trainer_id = ?
+                UNION
+                SELECT user_id FROM $TABLE_ENROLLMENTS WHERE trainer_id = ?
+            )
+        """.trimIndent()
+        val cursor = readableDatabase.rawQuery(query, arrayOf(trainerId.toString(), trainerId.toString(), trainerId.toString(), trainerId.toString()))
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(com.example.fitbody.model.User(
+                    cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                    cursor.getString(cursor.getColumnIndexOrThrow("username")),
+                    cursor.getString(cursor.getColumnIndexOrThrow("email")),
+                    "",
+                    cursor.getString(cursor.getColumnIndexOrThrow("role")),
+                    cursor.getString(cursor.getColumnIndexOrThrow("avatar"))
+                ))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return list
     }
 
     fun getUserBySocialId(id: String, p: String): Int {

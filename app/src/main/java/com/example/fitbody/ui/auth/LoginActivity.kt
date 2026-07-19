@@ -54,7 +54,7 @@ class LoginActivity : AppCompatActivity() {
 
         // 2. Kiểm tra đăng nhập an toàn
         try {
-            if (session.isLoggedIn() && !session.isSessionExpired()) {
+            if (session.isLoggedIn()) {
                 val role = session.getRole()
                 if (role == "pt") openPt(session.getUserId(), session.getUsername())
                 else openMainOrOnboarding(session.getUserId(), session.getUsername())

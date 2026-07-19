@@ -33,11 +33,7 @@ class SessionManager(
     }
 
     fun isSessionExpired(): Boolean {
-        if (!isLoggedIn()) return true
-        val lastActive = prefs.getLong("last_active_time", 0L)
-        val currentTime = System.currentTimeMillis()
-        val tenMinutesInMillis = 10 * 60 * 1000
-        return (currentTime - lastActive) > tenMinutesInMillis
+        return false // Tạm thời tắt kiểm tra hết hạn để người dùng không bị văng ra
     }
 
     fun isLoggedIn(): Boolean {

@@ -96,6 +96,17 @@
             android:backgroundTint="#FFFFFF"
             android:layout_marginTop="16dp"/>
 
+        <EditText
+            android:id="@+id/edtAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Địa chỉ"
+            android:inputType="textPostalAddress"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#888888"
+            android:backgroundTint="#FFFFFF"
+            android:layout_marginTop="16dp"/>
+
         <Button
             android:id="@+id/btnSaveProfile"
             android:layout_width="match_parent"

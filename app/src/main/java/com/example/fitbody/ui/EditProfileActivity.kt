@@ -30,6 +30,7 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var edtName: EditText
     private lateinit var edtEmail: EditText
     private lateinit var edtPhone: EditText
+    private lateinit var edtAddress: EditText
     private lateinit var btnSaveProfile: Button
     private lateinit var imgAvatarEdit: CircleImageView
     private lateinit var btnChangeAvatar: ImageButton
@@ -81,6 +82,7 @@ class EditProfileActivity : AppCompatActivity() {
         edtName = findViewById(R.id.edtName)
         edtEmail = findViewById(R.id.edtEmail)
         edtPhone = findViewById(R.id.edtPhone)
+        edtAddress = findViewById(R.id.edtAddress)
         btnSaveProfile = findViewById(R.id.btnSaveProfile)
         imgAvatarEdit = findViewById(R.id.imgAvatarEdit)
         btnChangeAvatar = findViewById(R.id.btnChangeAvatar)
@@ -145,10 +147,12 @@ class EditProfileActivity : AppCompatActivity() {
             val email = cursor.getString(1) ?: ""
             val avatar = cursor.getString(2)
             val phone = cursor.getString(3) ?: ""
+            val address = cursor.getString(4) ?: ""
 
             edtName.setText(name)
             edtEmail.setText(email)
             edtPhone.setText(phone)
+            edtAddress.setText(address)
 
             if (!avatar.isNullOrEmpty()) {
                 avatarPath = avatar
@@ -162,6 +166,7 @@ class EditProfileActivity : AppCompatActivity() {
         val name = edtName.text.toString().trim()
         val email = edtEmail.text.toString().trim()
         val phone = edtPhone.text.toString().trim()
+        val address = edtAddress.text.toString().trim()
 
         if (name.isEmpty() || email.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập họ tên và email", Toast.LENGTH_SHORT).show()
@@ -171,7 +176,7 @@ class EditProfileActivity : AppCompatActivity() {
         val userId = SessionManager(this).getUserId()
         val dbHelper = DatabaseHelper(this)
         
-        if (dbHelper.updateUserProfile(userId, name, email, avatarPath, phone)) {
+        if (dbHelper.updateUserProfile(userId, name, email, avatarPath, phone, address)) {
             Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show()
             finish()
         } else {

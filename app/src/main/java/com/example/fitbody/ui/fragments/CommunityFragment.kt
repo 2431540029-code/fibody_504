@@ -27,11 +27,16 @@ import com.bumptech.glide.Glide
 import com.example.fitbody.R
 import com.example.fitbody.adapter.CommunityAdapter
 import com.example.fitbody.database.DatabaseHelper
+import com.example.fitbody.model.Post
 import com.example.fitbody.utils.SessionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CommunityFragment : Fragment() {
 
@@ -41,6 +46,9 @@ class CommunityFragment : Fragment() {
     private lateinit var rvPosts: RecyclerView
     private lateinit var btnOpenCreatePost: TextView
     private lateinit var imgCurrentUserAvatar: de.hdodenhof.circleimageview.CircleImageView
+    
+    // FIREBASE
+    private val firestore = FirebaseFirestore.getInstance()
 
     private var selectedImagePath: String? = null
 
@@ -86,12 +94,11 @@ class CommunityFragment : Fragment() {
         loadUserAvatar()
         
         setupRecyclerView()
-        loadPosts()
+        loadPostsRealtime()
         
         btnOpenCreatePost.setOnClickListener { showAddPostDialog() }
         view.findViewById<View>(R.id.btnPostPhoto).setOnClickListener { showAddPostDialog() }
         
-        // Cập nhật ảnh đại diện khi nhấn vào avatar
         imgCurrentUserAvatar.setOnClickListener { showChangeAvatarDialog() }
         
         return view
@@ -100,7 +107,7 @@ class CommunityFragment : Fragment() {
     private fun loadUserAvatar() {
         val user = db.getUserById(session.getUserId())
         if (user?.avatar.isNullOrEmpty()) {
-            imgCurrentUserAvatar.setImageResource(android.R.drawable.ic_menu_gallery) // Placeholder "trống"
+            imgCurrentUserAvatar.setImageResource(android.R.drawable.ic_menu_gallery)
         } else {
             val avatar = user!!.avatar!!
             val resId = resources.getIdentifier(avatar, "drawable", requireContext().packageName)
@@ -145,7 +152,6 @@ class CommunityFragment : Fragment() {
             val path = file.absolutePath
             if (db.updateUserAvatar(session.getUserId(), path)) {
                 loadUserAvatar()
-                loadPosts() // Reload to update avatar in posts if any
             }
         } catch (e: Exception) {}
     }
@@ -158,7 +164,6 @@ class CommunityFragment : Fragment() {
             val path = file.absolutePath
             if (db.updateUserAvatar(session.getUserId(), path)) {
                 loadUserAvatar()
-                loadPosts()
             }
         } catch (e: Exception) {}
     }
@@ -166,9 +171,7 @@ class CommunityFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = CommunityAdapter(emptyList(), 
             onLikeClick = { post ->
-                if (db.togglePostLike(session.getUserId(), post.id)) {
-                    loadPosts()
-                }
+                toggleLikeFirebase(post)
             },
             onCommentClick = { Toast.makeText(requireContext(), "Tính năng bình luận đang phát triển", Toast.LENGTH_SHORT).show() }
         )
@@ -176,9 +179,38 @@ class CommunityFragment : Fragment() {
         rvPosts.adapter = adapter
     }
 
-    private fun loadPosts() {
-        val posts = db.getAllPosts(session.getUserId())
-        adapter.updateData(posts)
+    private fun loadPostsRealtime() {
+        firestore.collection("posts")
+            .orderBy("postDate", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) return@addSnapshotListener
+                
+                val postList = mutableListOf<Post>()
+                val currentUserId = session.getUserId()
+                
+                for (doc in snapshots!!) {
+                    val post = doc.toObject(Post::class.java).copy(id = doc.id)
+                    // Kiểm tra xem user hiện tại đã like chưa
+                    post.isLiked = post.likedBy.contains(currentUserId)
+                    post.likeCount = post.likedBy.size
+                    postList.add(post)
+                }
+                adapter.updateData(postList)
+            }
+    }
+
+    private fun toggleLikeFirebase(post: Post) {
+        val currentUserId = session.getUserId()
+        val postRef = firestore.collection("posts").document(post.id)
+        
+        val newLikedBy = post.likedBy.toMutableList()
+        if (newLikedBy.contains(currentUserId)) {
+            newLikedBy.remove(currentUserId)
+        } else {
+            newLikedBy.add(currentUserId)
+        }
+        
+        postRef.update("likedBy", newLikedBy)
     }
 
     private fun showAddPostDialog() {
@@ -249,11 +281,26 @@ class CommunityFragment : Fragment() {
         btnSubmit.setOnClickListener {
             val content = etContent.text.toString()
             if (content.isNotEmpty() || selectedImagePath != null) {
-                if (db.addPost(session.getUserId(), content, selectedImagePath) != -1L) {
-                    loadPosts()
-                    bottomSheet.dismiss()
-                    Toast.makeText(requireContext(), "Đã đăng bài thành công!", Toast.LENGTH_SHORT).show()
-                }
+                val date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+                val postMap = hashMapOf(
+                    "userId" to session.getUserId(),
+                    "username" to session.getUsername(),
+                    "userAvatar" to user?.avatar,
+                    "content" to content,
+                    "image" to selectedImagePath,
+                    "postDate" to date,
+                    "likedBy" to emptyList<Int>()
+                )
+                
+                firestore.collection("posts")
+                    .add(postMap)
+                    .addOnSuccessListener {
+                        bottomSheet.dismiss()
+                        Toast.makeText(requireContext(), "Đã đăng bài lên Firebase!", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Lỗi khi đăng bài!", Toast.LENGTH_SHORT).show()
+                    }
             } else {
                 Toast.makeText(requireContext(), "Vui lòng nhập nội dung hoặc chọn ảnh", Toast.LENGTH_SHORT).show()
             }

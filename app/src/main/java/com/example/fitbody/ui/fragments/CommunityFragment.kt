@@ -173,10 +173,61 @@ class CommunityFragment : Fragment() {
             onLikeClick = { post ->
                 toggleLikeFirebase(post)
             },
-            onCommentClick = { Toast.makeText(requireContext(), "Tính năng bình luận đang phát triển", Toast.LENGTH_SHORT).show() }
+            onCommentClick = { post ->
+                showCommentsDialog(post)
+            }
         )
         rvPosts.layoutManager = LinearLayoutManager(requireContext())
         rvPosts.adapter = adapter
+    }
+
+    private fun showCommentsDialog(post: Post) {
+        val bottomSheet = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.layout_comments_sheet, null)
+        bottomSheet.setContentView(view)
+
+        val rvComments = view.findViewById<RecyclerView>(R.id.rvComments)
+        val etInput = view.findViewById<EditText>(R.id.etCommentInput)
+        val btnSend = view.findViewById<View>(R.id.btnSendComment)
+
+        val commentAdapter = com.example.fitbody.adapter.CommentAdapter(emptyList())
+        rvComments.layoutManager = LinearLayoutManager(requireContext())
+        rvComments.adapter = commentAdapter
+
+        // Load comments real-time
+        val listener = firestore.collection("posts").document(post.id)
+            .collection("comments")
+            .orderBy("date", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshots, _ ->
+                if (snapshots != null) {
+                    val comments = snapshots.toObjects(com.example.fitbody.model.Comment::class.java)
+                    commentAdapter.updateData(comments)
+                    if (comments.isNotEmpty()) rvComments.scrollToPosition(comments.size - 1)
+                }
+            }
+
+        btnSend.setOnClickListener {
+            val text = etInput.text.toString().trim()
+            if (text.isNotEmpty()) {
+                val user = db.getUserById(session.getUserId())
+                val comment = com.example.fitbody.model.Comment(
+                    postId = post.id,
+                    userId = session.getUserId(),
+                    username = session.getUsername(),
+                    userAvatar = user?.avatar,
+                    text = text,
+                    date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+                )
+                
+                firestore.collection("posts").document(post.id)
+                    .collection("comments")
+                    .add(comment)
+                    .addOnSuccessListener { etInput.setText("") }
+            }
+        }
+
+        bottomSheet.setOnDismissListener { listener.remove() }
+        bottomSheet.show()
     }
 
     private fun loadPostsRealtime() {

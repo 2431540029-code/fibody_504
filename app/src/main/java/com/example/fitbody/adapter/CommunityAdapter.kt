@@ -26,6 +26,7 @@ class CommunityAdapter(
         val icLike: ImageView = view.findViewById(R.id.icLike)
         val txtLikeCount: TextView = view.findViewById(R.id.txtLikeCount)
         val btnComment: View = view.findViewById(R.id.btnComment)
+        val btnShare: View = view.findViewById(R.id.btnShare)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -69,13 +70,24 @@ class CommunityAdapter(
         if (!post.image.isNullOrEmpty()) {
             holder.imgPost.visibility = View.VISIBLE
             val resId = holder.itemView.context.resources.getIdentifier(post.image, "drawable", holder.itemView.context.packageName)
-            Glide.with(holder.itemView.context).load(if (resId != 0) resId else post.image).into(holder.imgPost)
+            if (resId != 0) {
+                Glide.with(holder.itemView.context).load(resId).into(holder.imgPost)
+            } else {
+                Glide.with(holder.itemView.context).load(post.image).into(holder.imgPost)
+            }
         } else {
             holder.imgPost.visibility = View.GONE
         }
 
         holder.btnLike.setOnClickListener { onLikeClick(post) }
         holder.btnComment.setOnClickListener { onCommentClick(post) }
+        holder.btnShare.setOnClickListener { 
+            val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(android.content.Intent.EXTRA_TEXT, "${post.username}: ${post.content}")
+            }
+            holder.itemView.context.startActivity(android.content.Intent.createChooser(shareIntent, "Chia sẻ bài viết này qua..."))
+        }
     }
 
     override fun getItemCount() = posts.size

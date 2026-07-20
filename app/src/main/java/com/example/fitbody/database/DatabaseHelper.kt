@@ -647,9 +647,17 @@ class DatabaseHelper(context: Context) :
 
     fun getLeaderboard(): List<com.example.fitbody.model.LeaderboardUser> {
         val list = mutableListOf<com.example.fitbody.model.LeaderboardUser>()
-        val query = "SELECT u.username, (SELECT COUNT(*) FROM $TABLE_CHECKIN WHERE user_id = u.id) as workout_count FROM $TABLE_USERS u WHERE u.role = 'user' ORDER BY workout_count DESC LIMIT 10"
+        val query = "SELECT u.username, (SELECT COUNT(*) FROM $TABLE_CHECKIN WHERE user_id = u.id) as workout_count, u.avatar FROM $TABLE_USERS u WHERE u.role = 'user' ORDER BY workout_count DESC LIMIT 10"
         val cursor = readableDatabase.rawQuery(query, null)
-        if (cursor.moveToFirst()) { do { list.add(com.example.fitbody.model.LeaderboardUser(cursor.getString(0), cursor.getInt(1))) } while (cursor.moveToNext()) }
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(com.example.fitbody.model.LeaderboardUser(
+                    cursor.getString(0),
+                    cursor.getInt(1),
+                    cursor.getString(2)
+                ))
+            } while (cursor.moveToNext())
+        }
         cursor.close(); return list
     }
 

@@ -1,57 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#121212"
-    android:padding="24dp">
+    android:background="#121212">
 
-    <TextView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Cá nhân"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp" />
+        android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/imgPtProfileMain"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_gravity="center"
-        android:scaleType="centerCrop"
-        android:background="#333333"
-        android:contentDescription="Avatar" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
 
-    <TextView
-        android:id="@+id/txtPtProfileNameMain"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp"
-        android:text="Tên HLV"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+            <!-- PT HEADER -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cá nhân"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="24dp" />
 
-    <Button
-        android:id="@+id/btnPtChangeImageMain"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Đổi ảnh đại diện"
-        android:backgroundTint="#333333"
-        android:textSize="12sp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="40dp" />
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/imgPtProfileMain"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/male"
+                app:civ_border_color="#7C4DFF"
+                app:civ_border_width="2dp" />
 
-    <Button
-        android:id="@+id/btnPtLogoutMain"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="ĐĂNG XUẤT"
-        android:backgroundTint="#FF5252"
-        android:textStyle="bold" />
+            <TextView
+                android:id="@+id/txtPtProfileNameMain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Tên HLV"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold" />
 
-</LinearLayout>
+            <TextView
+                android:id="@+id/txtPtSpecialty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Huấn luyện viên chuyên nghiệp"
+                android:textColor="#AAAAAA"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnPtChangeImageMain"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Chỉnh sửa hồ sơ"
+                android:textColor="#7C4DFF" />
+
+            <!-- PT STATS CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E1E1E"
+                app:cardElevation="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="HỌC VIÊN" android:textColor="#AAAAAA" android:textSize="11sp"/>
+                        <TextView android:id="@+id/txtPtTotalStudents" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="#00E676" android:textSize="18sp" android:textStyle="bold"/>
+                    </LinearLayout>
+                    <View android:layout_width="1dp" android:layout_height="30dp" android:background="#33FFFFFF" android:layout_gravity="center_vertical"/>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="LƯỢT THÍCH" android:textColor="#AAAAAA" android:textSize="11sp"/>
+                        <TextView android:id="@+id/txtPtTotalLikes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="#FF4081" android:textSize="18sp" android:textStyle="bold"/>
+                    </LinearLayout>
+                    <View android:layout_width="1dp" android:layout_height="30dp" android:background="#33FFFFFF" android:layout_gravity="center_vertical"/>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="BÀI TẬP" android:textColor="#AAAAAA" android:textSize="11sp"/>
+                        <TextView android:id="@+id/txtPtTotalWorkouts" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- PT SETTINGS GROUP -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="12dp"
+                android:text="Quản lý &amp; Cài đặt"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E1E1E"
+                app:cardElevation="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:id="@+id/layoutPtDarkMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+                        <TextView
+                            android:id="@+id/txtPtDarkMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🌙 Chế độ tối"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp" />
+                    </RelativeLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#15FFFFFF" android:layout_marginHorizontal="16dp"/>
+
+                    <TextView
+                        android:id="@+id/txtPtChangePassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:text="🔒 Đổi mật khẩu"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"/>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#15FFFFFF" android:layout_marginHorizontal="16dp"/>
+
+                    <TextView
+                        android:id="@+id/txtPtContactSupport"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:text="📧 Hỗ trợ kỹ thuật"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <Button
+                android:id="@+id/btnPtLogoutMain"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="40dp"
+                android:backgroundTint="#FF5252"
+                android:text="ĐĂNG XUẤT"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="40dp"
+                android:gravity="center"
+                android:text="FitBody For Trainers - v1.2.0"
+                android:textColor="#555555"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

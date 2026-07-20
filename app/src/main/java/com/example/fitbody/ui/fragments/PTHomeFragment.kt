@@ -110,22 +110,34 @@ class PTHomeFragment : Fragment() {
         txtPtWelcome.text = "Chào HLV, $ptUsername"
 
         lifecycleScope.launch(Dispatchers.IO) {
-            // Tải thông tin cá nhân
-            val cursor = dbHelper.getUserProfile(userId)
-            var avatarPath: String? = null
-            if (cursor.moveToFirst()) {
-                avatarPath = cursor.getString(2)
-            }
-            cursor.close()
-
+            // Tải thông tin cá nhân (Avatar)
+            val user = dbHelper.getUserById(userId)
             val realTrainerId = dbHelper.getTrainerIdByUsername(ptUsername)
             currentTrainerId = realTrainerId
             
+            // Lấy thông tin chi tiết trainer để có fallback image
+            val trainers = dbHelper.getAllTrainers(0)
+            val trainerDetail = if (realTrainerId != 0) trainers.find { it.id == realTrainerId } else null
+
             withContext(Dispatchers.Main) {
-                if (!avatarPath.isNullOrEmpty()) {
-                    Glide.with(this@PTHomeFragment).load(File(avatarPath)).into(imgPtAvatar)
+                // Xử lý hiển thị Avatar
+                if (user != null && !user.avatar.isNullOrEmpty()) {
+                    val avatar = user.avatar
+                    val resId = resources.getIdentifier(avatar, "drawable", requireContext().packageName)
+                    if (resId != 0) {
+                        imgPtAvatar.setImageResource(resId)
+                    } else {
+                        Glide.with(this@PTHomeFragment)
+                            .load(File(avatar))
+                            .error(R.drawable.male)
+                            .into(imgPtAvatar)
+                    }
+                } else if (trainerDetail != null && trainerDetail.image.isNotEmpty()) {
+                    val resId = resources.getIdentifier(trainerDetail.image, "drawable", requireContext().packageName)
+                    if (resId != 0) imgPtAvatar.setImageResource(resId)
+                    else Glide.with(this@PTHomeFragment).load(trainerDetail.image).error(R.drawable.male).into(imgPtAvatar)
                 } else {
-                    imgPtAvatar.setImageResource(R.drawable.ic_launcher_background)
+                    imgPtAvatar.setImageResource(R.drawable.male)
                 }
 
                 if (realTrainerId != 0) {
@@ -135,7 +147,6 @@ class PTHomeFragment : Fragment() {
                     txtTotalStudents.text = studentCount.toString()
                     txtTotalWorkouts.text = workouts.size.toString()
                     
-                    // Thu nhập thật: giả định 500.000đ/học viên theo học
                     val income = studentCount * 500000
                     val formatter = java.text.NumberFormat.getInstance(Locale("vi", "VN"))
                     txtPtIncome.text = "${formatter.format(income)} đ"

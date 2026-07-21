@@ -358,6 +358,11 @@ class WorkoutSessionActivity : AppCompatActivity() {
         val seconds = (durationMillis / 1000) % 60
         txtTotalTime.text = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
         
+        // TỰ ĐỘNG LƯU BUỔI TẬP VÀO THỐNG KÊ
+        val userId = com.example.fitbody.utils.SessionManager(this).getUserId()
+        val dbHelper = DatabaseHelper(this)
+        dbHelper.addCheckIn(userId, "COMPLETED_SESSION_${trainerId}")
+        
         NotificationHelper.showNotification(this)
     }
 

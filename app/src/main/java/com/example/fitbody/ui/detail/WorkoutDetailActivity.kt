@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.fitbody.R
 import com.example.fitbody.database.DatabaseHelper
@@ -18,6 +19,9 @@ import com.example.fitbody.model.Workout
 import com.example.fitbody.ui.WorkoutTimerActivity
 import com.example.fitbody.ui.pt.EditWorkoutActivity
 import com.example.fitbody.utils.SessionManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class WorkoutDetailActivity : AppCompatActivity() {
 
@@ -111,38 +115,45 @@ class WorkoutDetailActivity : AppCompatActivity() {
     }
 
     private fun loadWorkoutData() {
-        val db = DatabaseHelper(this)
-        currentWorkout = db.getWorkoutById(workoutId)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = DatabaseHelper(this@WorkoutDetailActivity)
+            val workout = db.getWorkoutById(workoutId)
+            
+            withContext(Dispatchers.Main) {
+                currentWorkout = workout
+                if (workout == null) {
+                    Toast.makeText(this@WorkoutDetailActivity, "Không tìm thấy dữ liệu bài tập", Toast.LENGTH_SHORT).show()
+                    return@withContext
+                }
 
-        currentWorkout?.let { workout ->
-            txtWorkoutName.text = workout.workout_name
-            txtSets.text = "Sets: ${workout.sets_count}"
-            txtReps.text = "Reps: ${workout.reps_count}"
-            txtMuscle.text = "Nhóm cơ: ${workout.muscle_group}"
-            txtGuide.text = "Giữ form đúng, siết cơ khi tập và nghỉ 60 giây giữa mỗi set."
+                txtWorkoutName.text = workout.workout_name
+                txtSets.text = "Sets: ${workout.sets_count}"
+                txtReps.text = "Reps: ${workout.reps_count}"
+                txtMuscle.text = "Nhóm cơ: ${workout.muscle_group}"
+                txtGuide.text = "Giữ form đúng, siết cơ khi tập và nghỉ 60 giây giữa mỗi set."
 
-            // Load ảnh động/GIF
-            val cleanName = workout.workout_name.lowercase()
-                .replace(" ", "_")
-                .replace("á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ".toRegex(), "a")
-                .replace("é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ".toRegex(), "e")
-                .replace("í|ì|ỉ|ĩ|ị".toRegex(), "i")
-                .replace("ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ".toRegex(), "o")
-                .replace("ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự".toRegex(), "u")
-                .replace("ý|ỳ|ỷ|ỹ|ỵ".toRegex(), "y")
-                .replace("đ".toRegex(), "d")
+                // Load ảnh động/GIF
+                val cleanName = workout.workout_name.lowercase()
+                    .replace(" ", "_")
+                    .replace("á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ".toRegex(), "a")
+                    .replace("é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ".toRegex(), "e")
+                    .replace("í|ì|ỉ|ĩ|ị".toRegex(), "i")
+                    .replace("ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ".toRegex(), "o")
+                    .replace("ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự".toRegex(), "u")
+                    .replace("ý|ỳ|ỷ|ỹ|ỵ".toRegex(), "y")
+                    .replace("đ".toRegex(), "d")
 
-            val resId = resources.getIdentifier(cleanName, "raw", packageName)
-            Glide.with(this)
-                .asGif()
-                .load(if (resId != 0) resId else R.drawable.ic_launcher_background)
-                .into(imgWorkout)
+                val resId = resources.getIdentifier(cleanName, "raw", packageName)
+                Glide.with(this@WorkoutDetailActivity)
+                    .asGif()
+                    .load(if (resId != 0) resId else R.drawable.ic_launcher_background)
+                    .into(imgWorkout)
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        // Reload data to show changes after editing
         loadWorkoutData()
     }
 

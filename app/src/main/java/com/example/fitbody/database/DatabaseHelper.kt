@@ -18,7 +18,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "fitbody.db"
-        private const val DATABASE_VERSION = 20
+        private const val DATABASE_VERSION = 21
 
         const val TABLE_USERS = "tbl_users"
         const val TABLE_TRAINERS = "tbl_trainers"
@@ -112,16 +112,86 @@ class DatabaseHelper(context: Context) :
 
     private fun seedWorkouts(db: SQLiteDatabase) {
         val workouts = arrayOf(
-            "(100, 1, 'Bật nhảy', '30 giây', '0', 'Khởi động', '')",
-            "(101, 1, 'Chống đẩy cao tay', '16 lần', '16', 'Ngực', '')",
-            "(102, 1, 'Chống đẩy bằng đầu gối', '12 lần', '12', 'Ngực', '')",
-            "(103, 1, 'Chống đẩy', '10 lần', '10', 'Ngực', '')",
-            "(104, 1, 'Bench Press', '4 hiệp', '12', 'Ngực', 'https://youtu.be/rT7DgCr-3pg')",
-            "(201, 2, 'Squat', '4 hiệp', '15', 'Mông - Đùi', 'https://youtu.be/aclHkVaku9U')",
-            "(202, 2, 'Chùng chân', '3 hiệp', '12', 'Đùi sau', 'https://www.youtube.com/watch?v=QOVaHwm-Q6U')",
-            "(205, 2, 'Plank bụng', '60 giây', '0', 'Bụng', 'https://www.youtube.com/watch?v=pSHjTRCQxIw')",
-            "(301, 16, 'Deadlift', '4 hiệp', '8', 'Full Body', 'https://youtu.be/op9kVnSso6Q')",
-            "(302, 16, 'Pull up', '3 hiệp', '10', 'Lưng', '')"
+            // HLV AN (ID: 1) - Ngực & Tay sau
+            "(100, 1, 'Bật nhảy', '3 hiệp', '15 lần', 'Khởi động', '')",
+            "(101, 1, 'Chống đẩy cao tay', '3 hiệp', '12 lần', 'Ngực', '')",
+            "(102, 1, 'Chống đẩy bằng đầu gối', '3 hiệp', '10 lần', 'Ngực', '')",
+            "(103, 1, 'Chống đẩy', '4 hiệp', '12 lần', 'Ngực', '')",
+            "(104, 1, 'Bench Press', '4 hiệp', '10 lần', 'Ngực', 'https://youtu.be/rT7DgCr-3pg')",
+            "(105, 1, 'Banh ngực tạ đôi', '3 hiệp', '12 lần', 'Ngực', '')",
+
+            // HLV Quỳnh Anh (ID: 2) - Mông & Đùi
+            "(201, 2, 'Squat', '4 hiệp', '15 lần', 'Mông - Đùi', 'https://youtu.be/aclHkVaku9U')",
+            "(202, 2, 'Chùng chân', '3 hiệp', '12 lần', 'Đùi sau', 'https://www.youtube.com/watch?v=QOVaHwm-Q6U')",
+            "(203, 2, 'Plank bụng', '3 hiệp', '60 giây', 'Bụng', 'https://www.youtube.com/watch?v=pSHjTRCQxIw')",
+            "(204, 2, 'Cầu mông', '4 hiệp', '20 lần', 'Mông', '')",
+            "(205, 2, 'Gánh tạ nặng', '4 hiệp', '8 lần', 'Mông - Đùi', '')",
+            "(206, 2, 'Squat một chân', '3 hiệp', '10 lần', 'Mông - Đùi', '')",
+
+            // HLV Tiến (ID: 16) - Sức mạnh
+            "(301, 16, 'Deadlift cơ bản', '4 hiệp', '8 lần', 'Toàn thân', 'https://youtu.be/op9kVnSso6Q')",
+            "(302, 16, 'Hít xà đơn', '3 hiệp', '10 lần', 'Lưng', '')",
+            "(303, 16, 'Kéo tạ đơn', '4 hiệp', '10 lần', 'Lưng', '')",
+            "(304, 16, 'Kéo xà rộng tay', '3 hiệp', '8 lần', 'Lưng', '')",
+
+            // HLV Trí (ID: 17) - Calisthenics
+            "(401, 17, 'Chống xà kép', '3 hiệp', '12 lần', 'Ngực - Tay sau', '')",
+            "(402, 17, 'Hít đất vỗ tay', '3 hiệp', '10 lần', 'Ngực', '')",
+            "(403, 17, 'Hít đất kim cương', '3 hiệp', '12 lần', 'Tay sau', '')",
+            "(404, 17, 'Trồng chuối dựa tường', '3 hiệp', '30 giây', 'Vai', '')",
+
+            // HLV Nhi (ID: 18) - Yoga
+            "(501, 18, 'Tư thế cái cây', '3 hiệp', '45 giây', 'Thăng bằng', '')",
+            "(502, 18, 'Tư thế chiến binh', '3 hiệp', '45 giây', 'Toàn thân', '')",
+            "(503, 18, 'Tư thế chó úp mặt', '3 hiệp', '60 giây', 'Giãn cơ', '')",
+            "(504, 18, 'Tư thế rắn hổ mang', '3 hiệp', '45 giây', 'Lưng', '')",
+
+            // HLV Tony (ID: 19) - HIIT
+            "(601, 19, 'Bật nhảy Jack', '4 hiệp', '45 giây', 'Cardio', '')",
+            "(602, 19, 'Bật nhảy ngang', '4 hiệp', '30 giây', 'Cardio', '')",
+            "(603, 19, 'Leo núi', '4 hiệp', '30 giây', 'Bụng', '')",
+            "(604, 19, 'Chạy tại chỗ', '4 hiệp', '60 giây', 'Tim mạch', '')",
+
+            // HLV Jenny (ID: 20) - Pilates
+            "(701, 20, 'Gập bụng chữ V', '3 hiệp', '15 lần', 'Bụng', '')",
+            "(702, 20, 'Đạp xe trên không', '3 hiệp', '20 lần', 'Bụng', '')",
+            "(703, 20, 'Hít thở bụng', '3 hiệp', '2 phút', 'Phục hồi', '')",
+
+            // HLV Minh Anh (ID: 21) - Cardio
+            "(801, 21, 'Nhảy dây', '5 hiệp', '2 phút', 'Tim mạch', '')",
+            "(802, 21, 'Nhảy cóc', '3 hiệp', '15 lần', 'Đùi', '')",
+            "(803, 21, 'Di chuyển bộ chân', '4 hiệp', '1 phút', 'Linh hoạt', '')",
+
+            // HLV Bảo Ngọc (ID: 22) - Khởi động
+            "(901, 22, 'Cúi người chạm mũi chân', '2 hiệp', '15 lần', 'Giãn cơ', '')",
+            "(902, 22, 'Vặn mình khởi động', '2 hiệp', '20 lần', 'Toàn thân', '')",
+            "(903, 22, 'Xoay khớp vai', '2 hiệp', '20 lần', 'Vai', '')",
+
+            // HLV Hoàng Nam (ID: 23) - Thể hình
+            "(1001, 23, 'Đẩy ngực trên', '4 hiệp', '12 lần', 'Ngực', '')",
+            "(1002, 23, 'Đẩy vai tạ đôi', '4 hiệp', '10 lần', 'Vai', '')",
+            "(1003, 23, 'Cuốn tạ tay', '3 hiệp', '12 lần', 'Tay trước', '')",
+
+            // HLV Quốc Huy (ID: 24) - Boxing
+            "(1101, 24, 'Đấm móc', '4 hiệp', '30 giây', 'Combat', '')",
+            "(1102, 24, 'Đấm vòng', '4 hiệp', '30 giây', 'Combat', '')",
+            "(1103, 24, 'Đấm thẳng liên tục', '4 hiệp', '1 phút', 'Combat', '')",
+            "(1104, 24, 'Né đòn linh hoạt', '4 hiệp', '1 phút', 'Phản xạ', '')",
+
+            // HLV Kim Chi (ID: 25) - Phục hồi
+            "(1201, 25, 'Căng vai', '3 hiệp', '30 giây', 'Giãn cơ', '')",
+            "(1202, 25, 'Giãn cơ lưng', '3 hiệp', '30 giây', 'Giãn cơ', '')",
+            "(1203, 25, 'Giãn cơ đùi sau', '3 hiệp', '30 giây', 'Giãn cơ', '')",
+            "(1204, 25, 'Xoay cổ nhẹ nhàng', '2 hiệp', '1 phút', 'Cổ', '')",
+
+            // HLV Tuấn Kiệt (ID: 26) - Street Workout
+            "(1301, 26, 'Gập bụng trên xà', '3 hiệp', '12 lần', 'Bụng', '')",
+            "(1302, 26, 'Hít đất vỗ tay', '4 hiệp', '8 lần', 'Ngực', '')",
+
+            // HLV Lan Hương (ID: 27) - Thể dục
+            "(1401, 27, 'Nâng mông nhẹ nhàng', '3 hiệp', '15 lần', 'Mông', '')",
+            "(1402, 27, 'Nâng chân nằm nghiêng', '3 hiệp', '15 lần', 'Đùi', '')",
+            "(1403, 27, 'Đi bộ chậm', '1 hiệp', '10 phút', 'Tim mạch', '')"
         )
         for (w in workouts) {
             db.execSQL("INSERT OR IGNORE INTO $TABLE_WORKOUTS (id, trainer_id, workout_name, sets_count, reps_count, muscle_group, video_url) VALUES $w")

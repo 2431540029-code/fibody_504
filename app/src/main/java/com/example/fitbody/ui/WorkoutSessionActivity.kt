@@ -162,7 +162,8 @@ class WorkoutSessionActivity : AppCompatActivity() {
             val resId = resources.getIdentifier(cleanName, "raw", packageName)
             Glide.with(this)
                 .asGif()
-                .load(if (resId != 0) resId else R.raw.bat_nhay)
+                .load(if (resId != 0) resId else android.R.color.transparent)
+                .placeholder(R.drawable.ic_launcher_background)
                 .into(imgWorkoutGif)
         }
 

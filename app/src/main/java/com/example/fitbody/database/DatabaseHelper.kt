@@ -18,7 +18,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "fitbody.db"
-        private const val DATABASE_VERSION = 21
+        private const val DATABASE_VERSION = 22
 
         const val TABLE_USERS = "tbl_users"
         const val TABLE_TRAINERS = "tbl_trainers"
@@ -200,8 +200,29 @@ class DatabaseHelper(context: Context) :
 
     private fun seedProducts(db: SQLiteDatabase) {
         val products = arrayOf(
-            "(1, 'Rule 1 - Pump', 650000, 800000, 'prod_rule1_pump', 'Tăng sức mạnh.', 'Tăng sức mạnh', 'Còn hàng', 1, 50, 12)",
-            "(2, 'Whey Gold Standard', 1550000, 1800000, 'prod_whey_gold', 'Đạm tăng cơ.', 'Protein', 'Còn hàng', 1, 30, 45)"
+            // TRANG 1
+            "(1, 'Rule 1 - Pump (30 lần dùng)', 650000, 800000, 'prod_rule1_pump', 'Tăng sức mạnh bùng nổ cho buổi tập.', 'Tăng sức mạnh', 'Còn hàng', 1, 50, 12)",
+            "(2, 'Whey Gold Standard 5lbs', 1550000, 1800000, 'prod_whey_gold', 'Đạm tinh khiết giúp phát triển cơ bắp.', 'Protein', 'Còn hàng', 1, 30, 45)",
+            "(3, 'Mutant Mass 5lbs', 950000, 1100000, 'prod_mutant_mass', 'Sữa tăng cân cực nhanh cho người gầy.', 'Tăng cân', 'Còn hàng', 0, 40, 8)",
+            "(4, 'Kirkland - Vitamin C', 640000, 750000, 'prod_vitamin_c', 'Hỗ trợ hệ miễn dịch và sức khỏe tổng thể.', 'Sức khỏe', 'Còn hàng', 0, 100, 150)",
+            "(5, 'BCAA Amino Energy', 850000, 950000, 'prod_bcaa', 'Tăng năng lượng và phục hồi cơ bắp.', 'Phục hồi', 'Còn hàng', 1, 25, 33)",
+            "(6, 'Creatine OstroVit', 550000, 650000, 'prod_creatine', 'Tăng sức mạnh và kích thước cơ bắp.', 'Tăng sức mạnh', 'Còn hàng', 0, 60, 21)",
+            
+            // TRANG 2
+            "(7, 'ISO 100 5lbs', 1950000, 2200000, 'prod_iso100', 'Dòng Whey Protein cao cấp nhất hiện nay.', 'Protein', 'Còn hàng', 1, 15, 10)",
+            "(8, 'Lipo 6 Black', 750000, 850000, 'prod_lipo6', 'Viên uống hỗ trợ đốt mỡ cực mạnh.', 'Giảm mỡ', 'Còn hàng', 0, 40, 56)",
+            "(9, 'Omega 3 Kirkland', 450000, 550000, 'prod_omega3', 'Tốt cho tim mạch và sức khỏe não bộ.', 'Sức khỏe', 'Còn hàng', 0, 80, 200)",
+            "(10, 'Pre-workout ABE', 790000, 890000, 'prod_abe', 'Kích thích tập luyện bùng nổ.', 'Tăng sức mạnh', 'Còn hàng', 1, 35, 19)",
+            "(11, 'Glucosamine 375 viên', 750000, 850000, 'prod_glucosamine', 'Bảo vệ xương khớp chắc khỏe.', 'Sức khỏe', 'Còn hàng', 0, 50, 42)",
+            "(12, 'Sữa tăng cân Serious Mass', 1350000, 1500000, 'prod_serious_mass', 'Tăng cân nhanh cho người khó hấp thụ.', 'Tăng cân', 'Còn hàng', 1, 20, 15)",
+
+            // TRANG 3
+            "(13, 'Bình lắc Shaker 700ml', 150000, 200000, 'prod_shaker', 'Tiện lợi để pha Protein mọi lúc.', 'Phụ kiện', 'Còn hàng', 0, 120, 500)",
+            "(14, 'Găng tay tập Gym', 250000, 350000, 'prod_gloves', 'Bảo vệ bàn tay khỏi chai sần.', 'Phụ kiện', 'Còn hàng', 0, 45, 89)",
+            "(15, 'Thảm tập Yoga', 450000, 600000, 'prod_yoga_mat', 'Chống trượt mồ hôi êm ái.', 'Phụ kiện', 'Còn hàng', 0, 30, 24)",
+            "(16, 'Đai lưng tập tạ', 550000, 700000, 'prod_belt', 'Bảo vệ cột sống khi đẩy tạ nặng.', 'Phụ kiện', 'Còn hàng', 0, 25, 13)",
+            "(17, 'Dây kéo xà Straps', 120000, 180000, 'prod_straps', 'Hỗ trợ cầm nắm tạ chắc chắn.', 'Phụ kiện', 'Còn hàng', 0, 100, 156)",
+            "(18, 'Ống đồng bảo vệ chân', 300000, 450000, 'prod_shin_guards', 'Bảo vệ chân khi tập Kickboxing.', 'Phụ kiện', 'Còn hàng', 0, 40, 7)"
         )
         for (p in products) {
             db.execSQL("INSERT OR IGNORE INTO $TABLE_PRODUCTS (id, name, price, original_price, image, description, category, stock_status, has_gift, stock_quantity, sold_quantity) VALUES $p")

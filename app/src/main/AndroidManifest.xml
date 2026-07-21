@@ -136,6 +136,12 @@
             android:name=".ui.pt.MyStudentsActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="false" />
+
+        <activity
+            android:name=".ui.pt.PTNotificationsActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+
         <activity
             android:name=".ui.WorkoutSessionActivity"
             android:windowSoftInputMode="adjustResize"

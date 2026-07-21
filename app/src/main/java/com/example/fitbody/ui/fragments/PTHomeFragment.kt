@@ -80,11 +80,11 @@ class PTHomeFragment : Fragment() {
         }
         
         btnPtBroadcast.setOnClickListener {
-            android.widget.Toast.makeText(requireContext(), "Chức năng thông báo sẽ sớm ra mắt!", android.widget.Toast.LENGTH_SHORT).show()
+            startActivity(Intent(requireContext(), com.example.fitbody.ui.pt.PTNotificationsActivity::class.java))
         }
         
         btnPtSchedule.setOnClickListener {
-            android.widget.Toast.makeText(requireContext(), "Xem lịch dạy chi tiết!", android.widget.Toast.LENGTH_SHORT).show()
+            startActivity(Intent(requireContext(), com.example.fitbody.ui.ScheduleActivity::class.java))
         }
 
         cardTotalStudents.setOnClickListener {
@@ -93,6 +93,11 @@ class PTHomeFragment : Fragment() {
                 intent.putExtra("trainer_id", currentTrainerId)
                 startActivity(intent)
             }
+        }
+
+        view?.findViewById<View>(R.id.cardTotalWorkouts)?.setOnClickListener {
+            // Chuyển sang tab Bài tập
+            requireActivity().findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavPt).selectedItemId = R.id.nav_pt_workouts
         }
     }
 
